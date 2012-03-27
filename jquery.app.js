@@ -28,10 +28,10 @@
             'region' : 'center'
         }).css({
                 overflow : 'hidden'
-            }).appendTo(jqTarget);
+            }).addClass('app-wall').appendTo(jqTarget);
         //墙纸设置
         if (opts.wallpaper) {
-            center.css('background', 'url("' + opts.wallpaper + '") fixed no-repeat center');
+            center.css('background-image', 'url("' + opts.wallpaper + '")');
         }
         if (jqTarget.context.nodeName !== 'BODY') //非body对象，添加fit属性
             jqTarget.attr('fit', true);
@@ -89,6 +89,17 @@
      * @param target
      */
     function initWidget(target) {}
+	
+	 /**
+     * 墙纸设置
+     * @param target
+	 * @param url
+     */
+	function setWallpaper(target,url){
+		var wall = $(target).layout('panel','center');
+		wall.css('background-image','url("'+url+'")');
+		$.data(target,'app').options.wallpaper = url;
+	}
 
     /**
      * 第一步是初始化layout
@@ -132,7 +143,7 @@
 
     $.fn.app = function (options, params) {
         if (typeof options === 'string') {
-            return this.methods[options].call(this, params);
+            return $.fn.app.methods[options].call(this, params);
         }
         options = options || {};
         return this.each(function () {
@@ -151,13 +162,22 @@
         });
     };
 
-    $.fn.app.methods = {};
+    $.fn.app.methods = {
+		options:function(){
+			return $.data(this[0],'app').options;
+		},
+		setWallpaper:function(wallpaperUrl){
+			return this.each(function(){
+				setWallpaper(this,wallpaperUrl);
+			});
+		}
+	};
 
     $.fn.app.parseOptions = function () {};
 
     $.fn.app.defaults = {
         taskBlankPos : 'souths', //任务栏的位置（north|south|west|east）
-        wallpaper : 'wallpaper.jpg',
+        wallpaper : null,
         lang : { //国际化
             initLayout : "init layout",
             initTaskBlank : "init task blank",
