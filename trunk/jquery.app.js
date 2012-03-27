@@ -109,7 +109,7 @@
 				var app = apps[i];
 				var appItem = $('<li/>').height(opts.iconSize + 25).width(opts.iconSize + 25).data('app', app);
 				appItem.attr("app_id", app.id);
-			
+				
 				appItem.css({
 					left : left,
 					top : top
@@ -120,7 +120,7 @@
 				
 				appItem.appendTo(appContainer);
 				top += opts.iconSize + 25;
-				line++;	
+				line++;
 			}
 			appContainer.appendTo(wall);
 		}
