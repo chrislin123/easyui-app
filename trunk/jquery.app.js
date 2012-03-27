@@ -64,7 +64,19 @@
      * 初始化任务栏
      * @param target
      */
-    function initTaskBlank(target) {}
+    function initTaskBlank(target) {
+			var jqTarget = $(target);
+			var state = $.data(target, 'app');
+			var opts = state.options;
+	
+			var taskBar = jqTarget.layout('panel', opts.taskBlankPos);
+			var taskBarDiv = taskBar.append('<div class="app-taskbar"></div>');
+			if (opts.taskBlankPos == 'north' || opts.taskBlankPos == 'south') {
+				taskBarDiv.addClass('app-taskbar-bg1');
+			} else {
+				taskBarDiv.addClass('app-taskbar-bg2');
+			}
+		}
 
     /**
      *初始化桌面
