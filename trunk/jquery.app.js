@@ -12,7 +12,7 @@
  * version: 0.1
  */
 (function ($) {
-	var loaded = false; //初始化状态
+	var loaded = false;
 	
 	/**
 	 * layout初始化
@@ -55,6 +55,7 @@
 		} else {
 			taskBlank.css("width", 35);
 		}
+		
 		//执行layout实例
 		jqTarget.layout();
 	}
@@ -84,11 +85,12 @@
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
 		var wall = jqTarget.layout('panel', 'center');
-		var lines = Math.floor(wall.height() / (opts.iconSize + 25));
+		var appContainer = $('<ul/>').addClass('app-container');
+		var lines = Math.floor(wall.height() / (opts.iconSize + 45));
 		var line = 1,
 		col = 1,
-		top = 0,
-		left = 0;
+		top = 20,
+		left = 10;
 		
 		if (opts.loadUrl.app && !loaded) {
 			$.get(opts.loadUrl.app, function (resp) {
@@ -96,18 +98,25 @@
 			}, 'JSON');
 		}
 		
+		/**
+		 * 初始app
+		 * @param apps
+		 */
 		function initApp(apps) {
-			var appContainer = $('<ul/>').addClass('app-container');
+			var relSize = opts.iconSize + 25;
 			for (var i in apps) {
 				if (line > lines) {
 					line = 1;
-					top = 0;
-					left += opts.iconSize + 25;
+					top = 20;
+					left += relSize + 20;
 					col++;
 				}
 				
 				var app = apps[i];
-				var appItem = $('<li/>').height(opts.iconSize + 25).width(opts.iconSize + 25).data('app', app);
+				var appItem = $('<li/>').css({
+						height : relSize,
+						width : relSize + 20
+					}).data('app', app);
 				appItem.attr("app_id", app.id);
 				
 				appItem.css({
@@ -115,15 +124,88 @@
 					top : top
 				});
 				
-				var icon = $('<div/>').height(opts.iconSize).width(opts.iconSize).addClass('icon-default ' + app.icon).appendTo(appItem);
+				var icon = $('<img/>').height(opts.iconSize).width(opts.iconSize).attr('src', app.icon).appendTo(appItem);
 				var text = $('<span/>').text(app.text).appendTo(appItem);
+				var em = $('<em/>').css({
+						height : relSize + 20,
+						width : relSize + 20
+					}).appendTo(appItem);
 				
 				appItem.appendTo(appContainer);
-				top += opts.iconSize + 25;
+				top += relSize + 20;
 				line++;
+				if ($.browser.msie) {
+					appItem.hover(function () {
+						$(this).addClass('hover');
+					}, function () {
+						$(this).removeClass('hover');
+					});
+				}
+				initAppDragg(appItem);
 			}
 			appContainer.appendTo(wall);
+			$.data(target, 'app')['appContainer'] = appContainer;
+			$(window).resize(function () {
+				setTimeout(function () {
+					appReset(target, appContainer);
+				}, 500); ;
+			});
 		}
+		
+		/**
+		 * 初始化图标拖拽
+		 * @param appItem
+		 */
+		function initAppDragg(appItem) {
+			appItem.draggable({
+				revert : true,
+				cursor : "default",
+				onStopDrag : function () {
+					appReset(target, appContainer);
+				}
+			}).droppable({
+				onDrop : function (e, source) {
+					if ($(source).prev().attr('app_id') == $(this).attr('app_id')) {
+						$(source).insertBefore(this);
+					} else {
+						$(source).insertAfter(this);
+					}
+				},
+				accept : '.app-container li'
+			})
+		}
+	}
+	
+	/**
+	 * 初始app
+	 * @param target
+	 * @param appContainer
+	 */
+	function appReset(target, appContainer) {
+		var jqTarget = $(target);
+		var opts = $.data(target, 'app').options;
+		var wall = jqTarget.layout('panel', 'center');
+		var lines = Math.floor(wall.height() / (opts.iconSize + 45));
+		var line = 1,
+		col = 1,
+		top = 20,
+		left = 10,
+		relSize = opts.iconSize + 25;
+		appContainer.children().each(function () {
+			if (line > lines) {
+				line = 1;
+				top = 20;
+				left += relSize + 20;
+				col++;
+			}
+			$(this).css({
+				left : left,
+				top : top
+			});
+			
+			top += relSize + 20;
+			line++;
+		});
 	}
 	
 	/**
@@ -174,8 +256,6 @@
 		if (loaded)
 			return;
 		
-		$('body').attr('oncontextmenu', 'return false'); //禁用全局右键菜单
-		
 		var progress = $.messager.progress({ //实例化进度条
 				title : options.lang.progress.title,
 				msg : options.lang.progress.msg,
@@ -193,6 +273,10 @@
 		}
 		$.messager.progress('close');
 		loaded = true;
+		
+		setTimeout(function () {
+			$('body').attr('oncontextmenu', 'return false'); //禁用全局右键菜单
+		}, 500);
 	}
 	
 	$.fn.app = function (options, params) {
@@ -223,6 +307,12 @@
 		setWallpaper : function (wallpaperUrl) {
 			return this.each(function () {
 				setWallpaper(this, wallpaperUrl);
+			});
+		},
+		appReset : function () {
+			return this.each(function () {
+				var appContainer = $.data(this, 'app').appContainer;
+				appReset(this, appContainer);
 			});
 		}
 	};

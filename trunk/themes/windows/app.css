@@ -1,7 +1,6 @@
-.app-wall{
+.app-wall {
 	background: url('images/wallpaper.jpg') fixed no-repeat center;
 }
-
 .app-container {
 	position: absolute;
 	top: 0;
@@ -11,41 +10,88 @@
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	margin:0;
-	padding:0;
+	margin: 0;
+	padding: 0;
 }
-.app-container li{
-    list-style:none;
+.app-container li {
+	list-style: none;
 	position: absolute;
 	padding: 10px 0;
 	text-align: center;
-	color:#fff;
-	margin:0;
-	padding:0;
+	color: #fff;
+	margin: 0;
 }
-.app-container li div{
-margin: 0 auto;
+.shortcut-container li img {
+	display: block;
+	margin: auto;
+	border-radius: 3px;
+}
+.app-container li em {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 0;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	background: #fff;
+	opacity: 0.12;
+	filter: alpha(opacity=12);
+}
+.app-container li: hover em,
+.app-container li.hover em {
+	display: block;
+}
+.app-container li.focus em {
+	display: block;
+	opacity: 0.25;
+	filter: alpha(opacity=25);
+}
+.app-container li span {
+	position: relative;
+	z-index: 1;
+	display: inline-block;
+	height: 20px;
+	margin-top: 5px;
+	padding: 0 8px;
+	line-height: 20px;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: white;
+	filter: progid: DXImageTransform.Microsoft.AlphaImageLoader(src='images/shortcut_text.png', sizingMethod='scale');
+	_filter: none;
+	_background: #1B3E65;
+	cursor: default;
+	_cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+}
+html: root .app-container li span {
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	background: rgba(0, 0, 0, 0.3);
+	filter: none;
 }
 /************************************************************/
-.app-taskbar {
+	.app-taskbar {
 	padding: 0;
 	height: 100%;
 	width: 100%;
 }
-
 .app-taskbar-bg1 {
 	background: black url(images/taskbuttons-panel-bg.gif);
 }
-
 .app-taskbar-bg2 {
 	background: black url(images/taskbuttons-panel-bg2.gif);
 }
-
 .app-taskbar-split {
 	background: url(images/taskbar-split-h.gif) no-repeat 0 0;
 	width: 8px;
 }
-
 .app-taskbar-startBtn {
 	background: url(images/startbutton-icon.gif) !important;
 }
