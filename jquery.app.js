@@ -156,7 +156,7 @@
     $.fn.app.parseOptions = function () {};
 
     $.fn.app.defaults = {
-        taskBlankPos : 'south', //任务栏的位置（north|south|west|east）
+        taskBlankPos : 'souths', //任务栏的位置（north|south|west|east）
         wallpaper : 'wallpaper.jpg',
         lang : { //国际化
             initLayout : "init layout",
