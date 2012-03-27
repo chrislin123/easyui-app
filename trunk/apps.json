@@ -1,0 +1,17 @@
+[{
+		"id" : "1",
+		"text" : "我的电脑",
+		"url" : "",
+		"icon" : "icon-computer"
+	}, {
+		"id" : "2",
+		"text" : "回收站",
+		"url" : "",
+		"icon" : "icon-bin"
+	}, {
+		"id" : "3",
+		"text" : "网络连接",
+		"url" : "",
+		"icon" : "icon-dns"
+	}
+]

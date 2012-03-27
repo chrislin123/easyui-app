@@ -84,9 +84,11 @@
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
 		var wall = jqTarget.layout('panel', 'center');
-		var lines = Math.floor(wall.height() / opts.iconSize);
+		var lines = Math.floor(wall.height() / (opts.iconSize + 25));
 		var line = 1,
-		col = 1;
+		col = 1,
+		top = 0,
+		left = 0;
 		
 		if (opts.loadUrl.app && !loaded) {
 			$.get(opts.loadUrl.app, function (resp) {
@@ -95,16 +97,32 @@
 		}
 		
 		function initApp(apps) {
-			console.info(apps);
+			var appContainer = $('<ul/>').addClass('app-container');
 			for (var i in apps) {
-				var app = apps[i];
 				if (line > lines) {
 					line = 1;
-					col++
+					top = 0;
+					left += opts.iconSize + 25;
+					col++;
 				}
-				var T = opts.iconSize * (line - 1);
-				var L = opts.iconSize * col;
+				
+				var app = apps[i];
+				var appItem = $('<li/>').height(opts.iconSize + 25).width(opts.iconSize + 25).data('app', app);
+				appItem.attr("app_id", app.id);
+			
+				appItem.css({
+					left : left,
+					top : top
+				});
+				
+				var icon = $('<div/>').height(opts.iconSize).width(opts.iconSize).addClass('icon-default ' + app.icon).appendTo(appItem);
+				var text = $('<span/>').text(app.text).appendTo(appItem);
+				
+				appItem.appendTo(appContainer);
+				top += opts.iconSize + 25;
+				line++;	
 			}
+			appContainer.appendTo(wall);
 		}
 	}
 	
