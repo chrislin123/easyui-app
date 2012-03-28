@@ -1,0 +1,18 @@
+[{
+    "id":"startMenu1",
+    "text":"Google",
+    "href":"http://www.google.com.hk",
+    "children":[{
+	    "id":"startMenu11",
+	    "text":"Baidu",
+	    "href":"http://www.baidu.com"
+    }]
+},{
+    "id":"startMenu2",
+    "text":"Sina",
+    "href":"http://www.sina.com"
+},{
+    "id":"startMenu3",
+    "text":"GodSon",
+    "href":"http://www.btboys.com"
+}]
