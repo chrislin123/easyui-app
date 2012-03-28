@@ -67,13 +67,19 @@
 	function initTaskBlank(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
-		
+
 		var taskBar = jqTarget.layout('panel', opts.taskBlankPos);
-		var taskBarDiv = taskBar.append('<div class="app-taskbar"></div>');
-		if (opts.taskBlankPos == 'north' || opts.taskBlankPos == 'south') {
+		var taskBarDiv = taskBar.append('<div class="app-taskbar"><div class="app-startmenu">开始</div><div class="app-tasklist">任务</div><div class="app-calendar">日期时间</div></div>');
+		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
 			taskBarDiv.addClass('app-taskbar-bg1');
+			$('.app-startmenu').css('float', 'left');
+			$('.app-tasklist').css('float', 'left');
+			$('.app-calendar').css('float', 'right');
 		} else {
 			taskBarDiv.addClass('app-taskbar-bg2');
+			$('.app-startmenu').css('float', 'left');
+			$('.app-tasklist').css('float', 'left');
+			$('.app-calendar').css('float', 'right');
 		}
 	}
 	
