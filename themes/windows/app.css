@@ -3,6 +3,8 @@ img{
 }
 .app-wall {
 	background: url('images/wallpaper.jpg') fixed no-repeat center;
+	position: relative;
+	overflow:hidden;
 }
 .app-container {
 	position: absolute;
@@ -43,7 +45,8 @@ img{
 	filter: alpha(opacity=12);
 }
 .app-container li:hover em,
-.app-container li.hover em {
+.app-container li.hover em,
+.app-container li.select em {
 	display: block;
 }
 .app-container li.focus em {

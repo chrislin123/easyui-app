@@ -25,8 +25,6 @@
 		var center = $('<div/>').attr({
 				'border' : false,
 				'region' : 'center'
-			}).css({
-				overflow : 'hidden'
 			}).addClass('app-wall').appendTo(jqTarget);
 		//墙纸设置
 		if (opts.wallpaper) {
@@ -67,30 +65,31 @@
 	function initTaskBlank(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
-		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos);//获取任务栏Layou面板容器
+		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos); //获取任务栏Layou面板容器
 		
-		var startMenu = $('<a class="app-startmenu-x" onfocus="this.blur()" href="#"></a>');//开始菜单按钮
-		var tasklist = $('<div/>');//创建任务区域
-		var calendar = $('<div/>');//创建时间区域
 		
-//		var split1 = $('<div/>').addClass('app-taskbar-split-h');//左边分割线
-//		var split2 = $('<div/>').addClass('app-taskbar-split-h');//左边分割线
+		var start = $('<a class="app-startmenu-x" onfocus="this.blur()" href="javascript:void(0)"></a>'); //开始菜单按钮
+		var tasklist = $('<div/>'); //创建任务区域
+		var calendar = $('<div/>'); //创建时间区域
 		
-		var taskBar = $('<div/>').addClass('app-taskbar');//创建任务栏对象
+		//		var split1 = $('<div/>').addClass('app-taskbar-split-h');//左边分割线
+		//		var split2 = $('<div/>').addClass('app-taskbar-split-h');//左边分割线
+		
+		var taskBar = $('<div/>').addClass('app-taskbar'); //创建任务栏对象
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
 			taskBar.addClass('app-taskbar-bg1');
 		} else {
 			taskBar.addClass('app-taskbar-bg2');
-			startMenu.removeClass('app-startmenu-x');
-			startMenu.addClass('app-startmenu-y');
-//			split1.removeClass('app-taskbar-split-h');
-//			split1.addClass('app-taskbar-split-w');
-//			split2.removeClass('app-taskbar-split-h');
-//			split2.addClass('app-taskbar-split-w');
+			start.removeClass('app-startmenu-x');
+			start.addClass('app-startmenu-y');
+			//			split1.removeClass('app-taskbar-split-h');
+			//			split1.addClass('app-taskbar-split-w');
+			//			split2.removeClass('app-taskbar-split-h');
+			//			split2.addClass('app-taskbar-split-w');
 		}
 		
 		//依次添加到任务栏对象里面
-		startMenu.appendTo(taskBar);
+		start.appendTo(taskBar);
 		//split1.appendTo(taskBar);
 		tasklist.appendTo(taskBar);
 		//split2.css('float','right');
@@ -99,7 +98,7 @@
 		taskBar.appendTo(taskBlank);
 		
 		$.data(target, 'app')['taskBar'] = taskBar;
-		$.data(target, 'app')['startMenu'] = startMenu;
+		$.data(target, 'app')['start'] = start;
 		$.data(target, 'app')['tasklist'] = tasklist;
 		$.data(target, 'app')['calendar'] = calendar;
 	}
@@ -171,12 +170,16 @@
 				initAppDragg(appItem);
 			}
 			appContainer.appendTo(wall);
-			$.data(target, 'app')['appContainer'] = appContainer;
+			
 			$(window).resize(function () {
 				setTimeout(function () {
 					appReset(target, appContainer);
 				}, 500); ;
 			});
+			
+			initContextMenu();
+			
+			$.data(target, 'app')['appContainer'] = appContainer;
 		}
 		
 		/**
@@ -200,6 +203,45 @@
 				},
 				accept : '.app-container li'
 			})
+		}
+		
+		/**
+		 * 初始化右键菜单
+		 * @param appItem
+		 */
+		function initContextMenu() {
+			var wallMenuData = [{"text":"属性","href":"http://www.sina.com" },'-',{"text":"关于","href":"http://www.btboys.com" }];
+			var appMenuData = [{"text":"打开","href":"http://www.sina.com" },'-',{"text":"属性","href":"http://www.btboys.com" }];
+			var appItems =  appContainer.children();
+			var wallMenu = createMenu(wallMenuData);
+			var appMenu = createMenu(appMenuData);
+
+			wall.mousedown(function(e){
+				if(e.target != appContainer[0])
+					return;
+					
+                appItems.removeClass("select");
+            }).bind('contextmenu',function(e){
+				if(e.target != appContainer[0])
+					return;
+					
+                wallMenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+                e.preventDefault();
+            });
+			
+			appItems.mousedown(function(){
+                appItems.removeClass("select");
+                $(this).addClass("select");
+            }).bind('contextmenu',function(e){		
+                appMenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+                e.preventDefault();
+            });
 		}
 	}
 	
@@ -242,73 +284,122 @@
 	function initStartMenu(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
-        var startMenuDiv = $('<div id="startMenuDiv" style="width:200px;"></div>').appendTo('body');
-        if (opts.loadUrl.startMenu && !loaded) {
+		var wall = jqTarget.layout('panel', 'center');
+		var startMenuDiv;
+		
+		if (opts.loadUrl.startMenu && !loaded) {
 			$.get(opts.loadUrl.startMenu, function (menus) {
 				initMenu(menus);
 			}, 'JSON');
 		}
-        //动态创建菜单
-        function initMenu(menus){
-	        for(var i=0;i<menus.length;i++){
-	            if(menus[i].children){
-	                startMenuDiv.append(appendChild(menus[i].text,menus[i].children));
-	            }else{
-	                var item = $('<div></div>').html(menus[i].text).attr("url",menus[i].href);//未添加点击事件
-	                startMenuDiv.append(item);
-	            }
-	        }
-	        startMenuDiv.menu();
-	        //添加“退出”菜单
-	        startMenuDiv.menu("appendItem",{
-	            id:"easyui_app_logout",
-	            text:"退出"
-	        });
-        }
-        //递归添加子菜单
-        function appendChild(itemText,childrens){
-            var item = $('<div></div>').append($('<span></span>').html(itemText));
-            var ci = $('<div style="width:200px;"></div>');
-            for(var i=0;i<childrens.length;i++){				
-                if(childrens[i].children){
-                    item.append(ci.append(appendChild(childrens[i].text,childrens[i].children)));
-                }else{
-                    item.append(ci.append($('<div></div>').html(childrens[i].text).attr("url",childrens[i].href)));//未添加点击事件
-                }
-            }
-            return item;
-        }
-        
-        var startMenu = $.data(target, 'app')['startMenu'];
-        //确定菜单显示位置
-        var left = 0,top = 0;
-        if(opts.taskBlankPos == 'south'){
-        	top = $(window).height()-startMenu.height();
-        }else if(opts.taskBlankPos == 'north'){
-        	top = startMenu.height();
-        }else if(opts.taskBlankPos == 'west'){
-        	top = startMenu.height()+7;
-        }else if(opts.taskBlankPos == 'east'){
-        	left = $(window).width();
-        	top = startMenu.height()+7;
-        }
-        
-		startMenu.click(function(e){
-            startMenuDiv.menu('show',{
-                left: left,
-                top: top
-            });
-        });
+		
+		/**
+		 * 初始化菜单
+		 * @param menus
+		 */
+		function initMenu(menus) {
+			startMenuDiv = createMenu(menus);
+			
+			//添加“退出”菜单
+			startMenuDiv.menu("appendItem", {
+				id : "easyui_app_logout",
+				text : "退出"
+			});
+			
+			var start = $.data(target, 'app')['start'];
+			//确定菜单显示位置
+			var left = 0,
+			top = 0;
+
+			start.click(function (e) {
+				if (opts.taskBlankPos == 'south') {
+					top = wall.height();
+				} else if (opts.taskBlankPos == 'north') {
+					top = start.height();
+				} else if (opts.taskBlankPos == 'west') {
+					top = start.height() + 7;
+				} else if (opts.taskBlankPos == 'east') {
+					left = wall.width();
+					top = start.height() + 7;
+				}
+				
+				startMenuDiv.menu('show', {
+					left : left,
+					top : top
+				});
+			});
+			
+			start.data('menu', startMenuDiv);
+		}
 	}
 	
 	/**
-	 *初始化时间
+	 * 创建菜单dom
+	 * @param menus
+	 */
+	function createMenu(menus) {
+		var startMenuDiv = $('<div style="width:200px;"></div>').appendTo('body');
+		for (var i = 0; i < menus.length; i++) {
+			var menu = menus[i];
+			if(menu == '-'){
+				var sep = $('<div class="menu-sep"></div>');
+				startMenuDiv.append(sep);
+				continue;
+			}
+			if (menu.children) {
+				startMenuDiv.append(appendChild(menu));
+			} else {
+				var item = $('<div></div>').html(menu.text).attr("url", menu.href); //未添加点击事件
+				if(menu.iconCls){
+					item.attr('iconCls',menu.iconCls);
+				}
+				startMenuDiv.append(item);
+			}
+		}
+		
+		return startMenuDiv.menu();
+		
+		/**
+		 * 递归添加子菜单
+		 * @param menu
+		 */
+		function appendChild(menu) {
+			var itemText = menu.text,childrens = menu.children;
+			var item = $('<div/>').append($('<span></span>').html(itemText));
+			if(menu.iconCls){
+				item.attr('iconCls',menu.iconCls);
+			}
+				
+			var ci = $('<div style="width:200px;"></div>');
+			for (var i = 0; i < childrens.length; i++) {
+				var cmenu = childrens[i];
+				if(cmenu == '-'){
+					var sep = $('<div class="menu-sep"></div>');
+					startMenuDiv.append(sep);
+					continue;
+				}
+				if (cmenu.children) {
+					item.append(ci.append(appendChild(cmenu)));
+				} else {
+					var citem = $('<div/>').html(cmenu.text).attr("url", cmenu.href);//未添加点击事件
+					if(cmenu.iconCls){
+						citem.attr('iconCls',cmenu.iconCls);
+					}
+					item.append(ci.append(citem)); 
+				}
+			}
+			return item;
+		}
+	}
+	
+	/**
+	 * 初始化时间
 	 * @param target
 	 */
 	function initCalendar(target) {}
 	
 	/**
-	 *初始化widget
+	 * 初始化widget
 	 * @param target
 	 */
 	function initWidget(target) {}
@@ -360,7 +451,7 @@
 		}
 		$.messager.progress('close');
 		loaded = true;
-				
+		
 		setTimeout(function () {
 			$('body').attr('oncontextmenu', 'return false'); //禁用全局右键菜单
 		}, 500);
