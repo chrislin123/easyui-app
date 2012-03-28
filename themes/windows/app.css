@@ -39,7 +39,7 @@
 	opacity: 0.12;
 	filter: alpha(opacity=12);
 }
-.app-container li: hover em,
+.app-container li:hover em,
 .app-container li.hover em {
 	display: block;
 }
