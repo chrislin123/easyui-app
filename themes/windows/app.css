@@ -1,3 +1,6 @@
+img{
+	border: none;
+}
 .app-wall {
 	background: url('images/wallpaper.jpg') fixed no-repeat center;
 }
@@ -68,13 +71,6 @@
 	_cursor: pointer;
 	-webkit-user-select: none;
 	-moz-user-select: none;
-}
-.app-container li span {
-	-webkit-border-radius: 10px;
-	-moz-border-radius: 10px;
-	border-radius: 10px;
-	background: rgba(0, 0, 0, 0.3);
-	filter: none;
 }
 /************************************************************/
 .app-taskbar {
