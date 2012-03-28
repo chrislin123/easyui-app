@@ -5,14 +5,19 @@
     "children":[{
 	    "id":"startMenu11",
 	    "text":"Baidu",
-	    "href":"http://www.baidu.com"
-    }]
+	    "href":"http://www.baidu.com",
+	"iconCls":"icon-ok"
+    }],
+	"iconCls":"icon-ok"
 },{
     "id":"startMenu2",
     "text":"Sina",
-    "href":"http://www.sina.com"
-},{
+    "href":"http://www.sina.com",
+	"iconCls":"icon-ok"
+},
+{
     "id":"startMenu3",
     "text":"GodSon",
-    "href":"http://www.btboys.com"
-}]
+    "href":"http://www.btboys.com",
+	"iconCls":"icon-ok"
+},"-"]
