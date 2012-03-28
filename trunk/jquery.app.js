@@ -210,38 +210,52 @@
 		 * @param appItem
 		 */
 		function initContextMenu() {
-			var wallMenuData = [{"text":"属性","href":"http://www.sina.com" },'-',{"text":"关于","href":"http://www.btboys.com" }];
-			var appMenuData = [{"text":"打开","href":"http://www.sina.com" },'-',{"text":"属性","href":"http://www.btboys.com" }];
-			var appItems =  appContainer.children();
+			var wallMenuData = [{
+					"text" : "属性",
+					"href" : "http://www.sina.com"
+				}, '-', {
+					"text" : "关于",
+					"href" : "http://www.btboys.com"
+				}
+			];
+			var appMenuData = [{
+					"text" : "打开",
+					"href" : "http://www.sina.com"
+				}, '-', {
+					"text" : "属性",
+					"href" : "http://www.btboys.com"
+				}
+			];
+			var appItems = appContainer.children();
 			var wallMenu = createMenu(wallMenuData);
 			var appMenu = createMenu(appMenuData);
-
-			wall.mousedown(function(e){
-				if(e.target != appContainer[0])
-					return;
-					
-                appItems.removeClass("select");
-            }).bind('contextmenu',function(e){
-				if(e.target != appContainer[0])
-					return;
-					
-                wallMenu.menu('show', {
-                    left: e.pageX,
-                    top: e.pageY
-                });
-                e.preventDefault();
-            });
 			
-			appItems.mousedown(function(){
-                appItems.removeClass("select");
-                $(this).addClass("select");
-            }).bind('contextmenu',function(e){		
-                appMenu.menu('show', {
-                    left: e.pageX,
-                    top: e.pageY
-                });
-                e.preventDefault();
-            });
+			wall.mousedown(function (e) {
+				if (e.target != appContainer[0])
+					return;
+				
+				appItems.removeClass("select");
+			}).bind('contextmenu', function (e) {
+				if (e.target != appContainer[0])
+					return;
+				
+				wallMenu.menu('show', {
+					left : e.pageX,
+					top : e.pageY
+				});
+				e.preventDefault();
+			});
+			
+			appItems.mousedown(function () {
+				appItems.removeClass("select");
+				$(this).addClass("select");
+			}).bind('contextmenu', function (e) {
+				appMenu.menu('show', {
+					left : e.pageX,
+					top : e.pageY
+				});
+				e.preventDefault();
+			});
 		}
 	}
 	
@@ -310,7 +324,7 @@
 			//确定菜单显示位置
 			var left = 0,
 			top = 0;
-
+			
 			start.click(function (e) {
 				if (opts.taskBlankPos == 'south') {
 					top = wall.height();
@@ -341,7 +355,7 @@
 		var startMenuDiv = $('<div style="width:200px;"></div>').appendTo('body');
 		for (var i = 0; i < menus.length; i++) {
 			var menu = menus[i];
-			if(menu == '-'){
+			if (menu == '-') {
 				var sep = $('<div class="menu-sep"></div>');
 				startMenuDiv.append(sep);
 				continue;
@@ -350,8 +364,8 @@
 				startMenuDiv.append(appendChild(menu));
 			} else {
 				var item = $('<div></div>').html(menu.text).attr("url", menu.href); //未添加点击事件
-				if(menu.iconCls){
-					item.attr('iconCls',menu.iconCls);
+				if (menu.iconCls) {
+					item.attr('iconCls', menu.iconCls);
 				}
 				startMenuDiv.append(item);
 			}
@@ -364,16 +378,17 @@
 		 * @param menu
 		 */
 		function appendChild(menu) {
-			var itemText = menu.text,childrens = menu.children;
+			var itemText = menu.text,
+			childrens = menu.children;
 			var item = $('<div/>').append($('<span></span>').html(itemText));
-			if(menu.iconCls){
-				item.attr('iconCls',menu.iconCls);
+			if (menu.iconCls) {
+				item.attr('iconCls', menu.iconCls);
 			}
-				
+			
 			var ci = $('<div style="width:200px;"></div>');
 			for (var i = 0; i < childrens.length; i++) {
 				var cmenu = childrens[i];
-				if(cmenu == '-'){
+				if (cmenu == '-') {
 					var sep = $('<div class="menu-sep"></div>');
 					startMenuDiv.append(sep);
 					continue;
@@ -381,11 +396,11 @@
 				if (cmenu.children) {
 					item.append(ci.append(appendChild(cmenu)));
 				} else {
-					var citem = $('<div/>').html(cmenu.text).attr("url", cmenu.href);//未添加点击事件
-					if(cmenu.iconCls){
-						citem.attr('iconCls',cmenu.iconCls);
+					var citem = $('<div/>').html(cmenu.text).attr("url", cmenu.href); //未添加点击事件
+					if (cmenu.iconCls) {
+						citem.attr('iconCls', cmenu.iconCls);
 					}
-					item.append(ci.append(citem)); 
+					item.append(ci.append(citem));
 				}
 			}
 			return item;
