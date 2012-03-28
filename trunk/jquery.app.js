@@ -279,7 +279,7 @@
 		}
 		$.messager.progress('close');
 		loaded = true;
-		
+				
 		setTimeout(function () {
 			$('body').attr('oncontextmenu', 'return false'); //禁用全局右键菜单
 		}, 500);
