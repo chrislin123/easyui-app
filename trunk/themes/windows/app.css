@@ -69,7 +69,7 @@
 	-webkit-user-select: none;
 	-moz-user-select: none;
 }
-html: root .app-container li span {
+.app-container li span {
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
@@ -77,7 +77,7 @@ html: root .app-container li span {
 	filter: none;
 }
 /************************************************************/
-	.app-taskbar {
+.app-taskbar {
 	padding: 0;
 	height: 100%;
 	width: 100%;
