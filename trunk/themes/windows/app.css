@@ -78,13 +78,43 @@ img{
 	height: 100%;
 	width: 100%;
 }
-
 .app-taskbar-bg1 {
 	background: url(images/taskbuttons-panel-bg.gif);
 }
-
 .app-taskbar-bg2 {
 	background: url(images/taskbuttons-panel-bg2.gif);
 }
-
+/******************************************************************/
+a.app-startmenu-x:link,a.app-startmenu-x:visited {
+	margin-left: 5px;
+	float: left;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	background: url(images/start.png) left center no-repeat;
+}
+a.app-startmenu-y:link,a.app-startmenu-y:visited {
+	margin-left: 4px;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	position:absolute; 
+	top:4px;
+	background: url(images/start.png) left center no-repeat;
+}
+a.app-startmenu-x:hover,a.app-startmenu-y:hover {
+	background: url(images/start2.png) left center no-repeat;
+}
+.app-taskbar-split-h {
+	float: left;
+	width: 10px;
+	height: 30px;
+	background: url(images/taskbar-split-h.gif) left center no-repeat;
+}
+.app-taskbar-split-w {
+	float: left;
+	width: 30px;
+	height: 10px;
+	background: url(images/taskbar-split-w.gif) left center no-repeat;
+}
 /******************************************************************/
