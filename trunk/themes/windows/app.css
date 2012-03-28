@@ -82,17 +82,13 @@
 	height: 100%;
 	width: 100%;
 }
+
 .app-taskbar-bg1 {
-	background: black url(images/taskbuttons-panel-bg.gif);
+	background: url(images/taskbuttons-panel-bg.gif);
 }
+
 .app-taskbar-bg2 {
-	background: black url(images/taskbuttons-panel-bg2.gif);
+	background: url(images/taskbuttons-panel-bg2.gif);
 }
-.app-taskbar-split {
-	background: url(images/taskbar-split-h.gif) no-repeat 0 0;
-	width: 8px;
-}
-.app-taskbar-startBtn {
-	background: url(images/startbutton-icon.gif) !important;
-}
+
 /******************************************************************/
