@@ -411,7 +411,32 @@
 	 * 初始化时间
 	 * @param target
 	 */
-	function initCalendar(target) {}
+	function initCalendar(target) {
+		function init() {
+			var jqTarget = $(target);
+			var opts = $.data(target, 'app').options;
+			var calendar = $.data(target, 'app')['calendar'];
+			var nowDate = new Date();
+			var year = nowDate.getFullYear();
+			var month = nowDate.getMonth() + 1;
+			var date = nowDate.getDate();
+			var day = nowDate.getDay() + 1;
+			var time = nowDate.toLocaleTimeString();
+			if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
+				calendar.removeClass('app-taskbar-calendar-y');
+				calendar.addClass('app-taskbar-calendar-x');
+				calendar.html(year + '年' + month + '月' + date + '日<br/>' + time);
+			} else {
+				calendar.removeClass('app-taskbar-calendar-x');
+				calendar.addClass('app-taskbar-calendar-y');
+				calendar.html(nowDate.getHours() + ':' + nowDate.getMinutes());
+			}
+		}
+		init();
+		window.setInterval(function() {
+			init();
+		}, 1000);
+	}
 	
 	/**
 	 * 初始化widget
