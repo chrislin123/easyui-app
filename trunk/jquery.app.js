@@ -66,34 +66,36 @@
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
 		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos); //获取任务栏Layou面板容器
+		var taskBar = $('<div/>').addClass('app-taskbar'); //创建任务栏对象
 		
-		
-		var start = $('<a class="app-startmenu-x" onfocus="this.blur()" href="javascript:void(0)"></a>'); //开始菜单按钮
+		var start = $('<a onfocus="this.blur()" href="javascript:void(0)"></a>'); //开始菜单按钮
 		var tasklist = $('<div/>'); //创建任务区域
 		var calendar = $('<div/>'); //创建时间区域
 		
-		//		var split1 = $('<div/>').addClass('app-taskbar-split-h');//左边分割线
-		//		var split2 = $('<div/>').addClass('app-taskbar-split-h');//左边分割线
-		
-		var taskBar = $('<div/>').addClass('app-taskbar'); //创建任务栏对象
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
 			taskBar.addClass('app-taskbar-bg1');
+			start.addClass('app-startmenu-x');
+			tasklist.addClass('app-tasklist-x');
+			calendar.addClass('app-taskbar-calendar-x');
+			
+			var scrollerLeft = $('<div/>').addClass('app-scroller-left').appendTo(tasklist);
+			var scrollerRight = $('<div/>').addClass('app-scroller-right').appendTo(tasklist);
+			var listWrap = $('<div/>').addClass('app-list-wrap').appendTo(tasklist);
+			var list = $('<ul/>').addClass('app-list-list').appendTo(listWrap);
+			
 		} else {
 			taskBar.addClass('app-taskbar-bg2');
-			start.removeClass('app-startmenu-x');
 			start.addClass('app-startmenu-y');
-			//			split1.removeClass('app-taskbar-split-h');
-			//			split1.addClass('app-taskbar-split-w');
-			//			split2.removeClass('app-taskbar-split-h');
-			//			split2.addClass('app-taskbar-split-w');
+			tasklist.addClass('app-tasklist-y');
+			calendar.addClass('app-taskbar-calendar-y');
+			
+			var scrollerTop = $('<div/>').addClass('app-scroller-top').appendTo(tasklist);
+			var scrollerBottom = $('<div/>').addClass('app-scroller-bottom').appendTo(tasklist);
 		}
 		
 		//依次添加到任务栏对象里面
 		start.appendTo(taskBar);
-		//split1.appendTo(taskBar);
 		tasklist.appendTo(taskBar);
-		//split2.css('float','right');
-		//split2.appendTo(taskBar);
 		calendar.appendTo(taskBar);
 		taskBar.appendTo(taskBlank);
 		
@@ -101,6 +103,18 @@
 		$.data(target, 'app')['start'] = start;
 		$.data(target, 'app')['tasklist'] = tasklist;
 		$.data(target, 'app')['calendar'] = calendar;
+		
+		function setTaskListWidth() {
+			if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
+				tasklist.width(taskBlank.width() - 120);
+			} else {
+				tasklist.height(taskBlank.height() - 75);
+			}
+		}
+		setTaskListWidth();
+		$(window).resize(function () {
+			setTimeout(setTaskListWidth, 500);
+		});
 	}
 	
 	/**
@@ -142,8 +156,9 @@
 				var appItem = $('<li/>').css({
 						height : relSize,
 						width : relSize + 20
-					}).data('app', app);
-				appItem.attr("app_id", app.id);
+					});
+				appItem.data('app', app);
+				appItem.attr("app_id", UUID());
 				
 				appItem.css({
 					left : left,
@@ -168,6 +183,16 @@
 					});
 				}
 				initAppDragg(appItem);
+				
+				if (opts.dbclick) {
+					appItem.on('dblclick', function () {
+						openApp.call(this, target);
+					});
+				} else {
+					appItem.on('click', function () {
+						openApp.call(this, target);
+					});
+				}
 			}
 			appContainer.appendTo(wall);
 			
@@ -423,17 +448,13 @@
 			var day = nowDate.getDay() + 1;
 			var time = nowDate.toLocaleTimeString();
 			if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
-				calendar.removeClass('app-taskbar-calendar-y');
-				calendar.addClass('app-taskbar-calendar-x');
 				calendar.html(year + '年' + month + '月' + date + '日<br/>' + time);
 			} else {
-				calendar.removeClass('app-taskbar-calendar-x');
-				calendar.addClass('app-taskbar-calendar-y');
 				calendar.html(nowDate.getHours() + ':' + nowDate.getMinutes());
 			}
 		}
 		init();
-		window.setInterval(function() {
+		window.setInterval(function () {
 			init();
 		}, 1000);
 	}
@@ -443,6 +464,174 @@
 	 * @param target
 	 */
 	function initWidget(target) {}
+	
+	/**
+	 * 打开App
+	 * @param target
+	 */
+	function openApp(target) {
+		var jqTarget = $(target);
+		var uuid = $(this).attr('app_id');
+		var appOpt = $(this).data("app");
+		var wall = jqTarget.layout('panel', 'center');
+		
+		var thisAppwindow = $('div[w_id="' + uuid + '"]', wall);
+		if (thisAppwindow.length) {
+			thisAppwindow.dialog('open');
+			appendToList(uuid, appOpt.text, true)
+			return;
+		}
+		
+		var appWindow = $('<div/>').attr('w_id', uuid).appendTo(wall);
+		var opened = wall.children('div.window');
+		var T = opened.length * 25 + 10;
+		var L = opened.length * 25 + 300;
+		
+		var defaultConif = {
+			title : appOpt.text,
+			height : 400,
+			width : 700,
+			top : T,
+			left : L,
+			resizable : true,
+			maximizable : true,
+			minimizable : true,
+			inline : true,
+			cache : false,
+			shadow : false,
+			onClose : function () {
+				var frame = $('iframe', this);
+				if (frame.length > 0) { //释放iframe
+					if (!/^http/i.test(frame[0].src)) {
+						frame[0].contentWindow.document.write('');
+					}
+					frame[0].contentWindow.close();
+					frame.remove();
+					if ($.browser.msie) {
+						CollectGarbage();
+					}
+				} else { //释放combo
+					$(this).find(".combo-f").each(function () {
+						var panel = $(this).data().combo.panel;
+						panel.panel("destroy");
+					});
+				}
+				
+				removeListItem($(this).attr('w_id'));
+				
+				$(this).dialog("destroy");
+			},
+			onMinimize : function () {
+				if ($(this).prev('.window-header').find('.panel-tool-restore').length == 1) {
+					var opts = $.data(this, 'panel').options;
+					opts.maximized = true;
+				}
+			},
+			onMove : function (left, top) {
+				var opts = $.data(this, 'panel').options;
+				if (top < 0) {
+					$(this).dialog("move", {
+						"left" : left,
+						"top" : 0
+					});
+					$(this).dialog("maximize");
+				} else if (opts.maximized) {
+					$(this).dialog("restore");
+					$(this).dialog("move", {
+						"left" : left + 100,
+						"top" : top
+					});
+				}
+				if (top > wall.height()) {
+					$(this).dialog("move", {
+						"left" : left,
+						"top" : (wall.height() - 25)
+					});
+				}
+			}
+		};
+		
+		if (appOpt.href && !/^http/i.test(appOpt.href)) {
+			defaultConif.href = appOpt.href;
+		}
+		appWindow.dialog(defaultConif);
+		
+		if (appOpt.href && /^http/i.test(appOpt.href)) {
+			var iframe = $('<iframe/>').attr({
+					width : '100%',
+					height : '99%',
+					frameborder : 0,
+					src : appOpt.href
+				});
+			appWindow.find('.dialog-content').append(iframe);
+		}
+		
+		appWindow.click(function () {
+			$(this).dialog('open');
+		});
+		
+		appendToList(uuid, appOpt.text, false);
+		
+		/**
+		 * 添加任务栏站位
+		 * @param uuid
+		 * @param text
+		 * @param status
+		 */
+		function appendToList(uuid, text, status) {
+			var tasklist = jqTarget.data('app').tasklist;
+			var list = tasklist.find('ul.app-list-list');
+			var wrap = list.parent();
+			list.children().removeClass('selected');
+			
+			if (status) {
+				$('div[w_id="' + uuid + '"]', wall).dialog('open');
+				$('li[l_id="' + uuid + '"]', list).addClass('selected');
+			} else {
+				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text);
+				list.append(item);
+				item.click(function () {
+					$('div[w_id="' + uuid + '"]', wall).dialog('open');
+					list.children().removeClass('selected');
+					$(this).addClass('selected');
+				});
+				
+				if (wrap.width() > tasklist.width()) {
+					wrap.width(tasklist.width());
+					$('div[class^="app-scroller-"]', tasklist).show();
+				}
+				
+				if (list.children().length != 1) {
+					wrap.width(item.outerWidth() + 10 + wrap.width());
+				} else {
+					wrap.width(item.outerWidth() + 10);
+				}
+			}
+		}
+		
+		/**
+		 * 移除任务栏站位
+		 * @param uuid
+		 */
+		function removeListItem(uuid) {
+			var item = $('li[l_id="' + uuid + '"]');
+			var wrap = item.parent().parent();
+			
+			wrap.width(wrap.width() - (item.outerWidth() + 4));
+			
+			item.remove();
+		}
+	}
+	
+	/**
+	 * 生成UUID
+	 */
+	function UUID() {
+		function S4() {
+			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+		}
+		return "UUID-" + (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+	}
 	
 	/**
 	 * 墙纸设置
@@ -540,6 +729,7 @@
 	$.fn.app.defaults = {
 		taskBlankPos : 'south', //任务栏的位置（north|south|west|east）
 		iconSize : 32,
+		dbclick : false,
 		wallpaper : null,
 		loadUrl : {
 			app : 'apps.json',
