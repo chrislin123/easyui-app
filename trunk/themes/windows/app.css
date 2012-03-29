@@ -87,6 +87,23 @@ img{
 .app-taskbar-bg2 {
 	background: url(images/taskbuttons-panel-bg2.gif);
 }
+.app-taskbar-calendar-x {
+	vertical-align: middle;
+	text-align: center;
+	float: right;
+	color: white;
+	padding: 2px;
+	text-align: center;
+}
+.app-taskbar-calendar-y {
+	position: absolute;
+	vertical-align: middle;
+	text-align: center;
+	bottom: 1px;
+	color: white;
+	text-align: center;
+	bottom: 1px;
+}
 /******************************************************************/
 a.app-startmenu-x:link,a.app-startmenu-x:visited {
 	margin-left: 5px;
