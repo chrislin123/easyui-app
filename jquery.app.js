@@ -186,11 +186,11 @@
 				
 				if (opts.dbclick) {
 					appItem.on('dblclick', function () {
-						openApp.call(this, target);
+						opts.appClick.call(this, target);
 					});
 				} else {
 					appItem.on('click', function () {
-						openApp.call(this, target);
+						opts.appClick.call(this, target);
 					});
 				}
 			}
@@ -466,7 +466,7 @@
 	function initWidget(target) {}
 	
 	/**
-	 * 打开App
+	 * 打开默认实现
 	 * @param target
 	 */
 	function openApp(target) {
@@ -731,6 +731,7 @@
 		iconSize : 32,
 		dbclick : false,
 		wallpaper : null,
+		appClick:openApp,
 		loadUrl : {
 			app : 'apps.json',
 			startMenu : 'startMenu.json'

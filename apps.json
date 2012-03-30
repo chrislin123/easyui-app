@@ -1,17 +1,17 @@
 [{
 		"id" : "1",
 		"text" : "我的电脑",
-		"href" : "http://www.btboys.com",
+		"href" : "opened.html",
 		"icon" : "themes/windows/icons/computer.png"
 	}, {
 		"id" : "2",
 		"text" : "回收站",
-		"href" : "http://www.btboys.com",
+		"href" : "opened.html",
 		"icon" : "themes/windows/icons/bin.png"
 	}, {
 		"id" : "3",
 		"text" : "网络连接",
-		"href" : "http://www.btboys.com",
+		"href" : "opened.html",
 		"icon" : "themes/windows/icons/dns.png"
 	}
 ]
