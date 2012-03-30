@@ -56,6 +56,13 @@
 		
 		//执行layout实例
 		jqTarget.layout();
+		
+		center.panel({
+			onResize : function (width, height) {
+				appReset(target);
+				setTaskListWidth(target);
+			}
+		});
 	}
 	
 	/**
@@ -104,17 +111,20 @@
 		$.data(target, 'app')['tasklist'] = tasklist;
 		$.data(target, 'app')['calendar'] = calendar;
 		
-		function setTaskListWidth() {
-			if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
-				tasklist.width(taskBlank.width() - 120);
-			} else {
-				tasklist.height(taskBlank.height() - 75);
-			}
+		setTaskListWidth(target);
+	}
+	
+	function setTaskListWidth(target) {
+		var jqTarget = $(target);
+		var opts = $.data(target, 'app').options;
+		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos); //获取任务栏Layou面板容器
+		var tasklist = $.data(target, 'app').tasklist;
+		
+		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
+			tasklist.width(taskBlank.width() - 120);
+		} else {
+			tasklist.height(taskBlank.height() - 75);
 		}
-		setTaskListWidth();
-		$(window).resize(function () {
-			setTimeout(setTaskListWidth, 500);
-		});
 	}
 	
 	/**
@@ -124,9 +134,15 @@
 	function initDeskTop(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
-		var wall = jqTarget.layout('panel', 'center');
-		var appContainer = $('<ul/>').addClass('app-container');
-		var lines = Math.floor(wall.height() / (opts.iconSize + 45));
+		var wall = jqTarget.layout('panel', 'center'); //桌面对象
+		var appContainer = $('<ul/>').addClass('app-container'); //app容器
+		
+		var lines = Math.floor((wall.height() - 20) / (opts.iconSize + 45)); //可显示行数
+		var columns = Math.floor((wall.width() - 20) / (opts.iconSize + 45)); //可显示列数
+		var wallMax = lines * columns; //每页显示app最大值
+		var lineAppBlank = ((wall.height() - 20) - (opts.iconSize + 45) * lines) / lines; //行间隔高度
+		var columnAppBlank = ((wall.width() - 20) - (opts.iconSize + 45) * columns) / columns; //列间隔宽度
+		//初始值
 		var line = 1,
 		col = 1,
 		top = 20,
@@ -143,22 +159,24 @@
 		 * @param apps
 		 */
 		function initApp(apps) {
-			var relSize = opts.iconSize + 25;
+			var relSize = opts.iconSize + 45;
 			for (var i in apps) {
 				if (line > lines) {
 					line = 1;
 					top = 20;
-					left += relSize + 20;
+					left += relSize + columnAppBlank;
 					col++;
 				}
 				
 				var app = apps[i];
+				
 				var appItem = $('<li/>').css({
 						height : relSize,
-						width : relSize + 20
+						width : relSize
 					});
-				appItem.data('app', app);
-				appItem.attr("app_id", UUID());
+				
+				appItem.data('app', app); //绑定每个app的详细信息到app元素上
+				appItem.attr("app_id", UUID()); //指定app的唯一标识
 				
 				appItem.css({
 					left : left,
@@ -168,23 +186,26 @@
 				var icon = $('<img/>').height(opts.iconSize).width(opts.iconSize).attr('src', app.icon).appendTo(appItem);
 				var text = $('<span/>').text(app.text).appendTo(appItem);
 				var em = $('<em/>').css({
-						height : relSize + 20,
-						width : relSize + 20
+						height : relSize,
+						width : relSize
 					}).appendTo(appItem);
 				
 				appItem.appendTo(appContainer);
-				top += relSize + 20;
+				
+				top += relSize + lineAppBlank; //下一行的top值
 				line++;
-				if ($.browser.msie) {
+				
+				if ($.browser.msie) { //兼容ie的hover
 					appItem.hover(function () {
 						$(this).addClass('hover');
 					}, function () {
 						$(this).removeClass('hover');
 					});
 				}
-				initAppDragg(appItem);
 				
-				if (opts.dbclick) {
+				initAppDragg(appItem); //初始化app的拖拽事件
+				
+				if (opts.dbclick) { //绑定App的点击事件（dbclick是否双击）
 					appItem.on('dblclick', function () {
 						opts.appClick.call(this, target);
 					});
@@ -195,12 +216,6 @@
 				}
 			}
 			appContainer.appendTo(wall);
-			
-			$(window).resize(function () {
-				setTimeout(function () {
-					appReset(target, appContainer);
-				}, 500); ;
-			});
 			
 			initContextMenu();
 			
@@ -214,10 +229,7 @@
 		function initAppDragg(appItem) {
 			appItem.draggable({
 				revert : true,
-				cursor : "default",
-				onStopDrag : function () {
-					appReset(target, appContainer);
-				}
+				cursor : "default"
 			}).droppable({
 				onDrop : function (e, source) {
 					if ($(source).prev().attr('app_id') == $(this).attr('app_id')) {
@@ -225,6 +237,9 @@
 					} else {
 						$(source).insertAfter(this);
 					}
+					setTimeout(function () {
+						appReset(target);
+					}, 0);
 				},
 				accept : '.app-container li'
 			})
@@ -252,8 +267,8 @@
 				}
 			];
 			var appItems = appContainer.children();
-			var wallMenu = createMenu(wallMenuData);
-			var appMenu = createMenu(appMenuData);
+			var wallMenu = createMenu(target, wallMenuData);
+			var appMenu = createMenu(target, appMenuData);
 			
 			wall.mousedown(function (e) {
 				if (e.target != appContainer[0])
@@ -289,21 +304,30 @@
 	 * @param target
 	 * @param appContainer
 	 */
-	function appReset(target, appContainer) {
+	function appReset(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
 		var wall = jqTarget.layout('panel', 'center');
-		var lines = Math.floor(wall.height() / (opts.iconSize + 45));
+		var appContainer = $.data(target, 'app').appContainer;
+		
+		var lines = Math.floor((wall.height() - 20) / (opts.iconSize + 45)); //可显示行数
+		var columns = Math.floor((wall.width() - 20) / (opts.iconSize + 45)); //可显示列数
+		var wallMax = lines * columns; //每页显示app最大值
+		var lineAppBlank = ((wall.height() - 20) - (opts.iconSize + 45) * lines) / lines; //行间隔高度
+		var columnAppBlank = ((wall.width() - 20) - (opts.iconSize + 45) * columns) / columns; //列间隔宽度
+		
+		//初始值
 		var line = 1,
 		col = 1,
 		top = 20,
-		left = 10,
-		relSize = opts.iconSize + 25;
+		left = 10;
+		
+		var relSize = opts.iconSize + 45;
 		appContainer.children().each(function () {
 			if (line > lines) {
 				line = 1;
 				top = 20;
-				left += relSize + 20;
+				left += relSize + columnAppBlank;
 				col++;
 			}
 			$(this).css({
@@ -311,7 +335,7 @@
 				top : top
 			});
 			
-			top += relSize + 20;
+			top += relSize + lineAppBlank;
 			line++;
 		});
 	}
@@ -337,7 +361,7 @@
 		 * @param menus
 		 */
 		function initMenu(menus) {
-			startMenuDiv = createMenu(menus);
+			startMenuDiv = createMenu(target, menus);
 			
 			//添加“退出”菜单
 			startMenuDiv.menu("appendItem", {
@@ -376,7 +400,8 @@
 	 * 创建菜单dom
 	 * @param menus
 	 */
-	function createMenu(menus) {
+	function createMenu(target, menus) {
+		var opts = $.data(target, 'app').options;
 		var startMenuDiv = $('<div style="width:200px;"></div>').appendTo('body');
 		for (var i = 0; i < menus.length; i++) {
 			var menu = menus[i];
@@ -396,7 +421,11 @@
 			}
 		}
 		
-		return startMenuDiv.menu();
+		return startMenuDiv.menu({
+			onClick : function (item) {
+				opts.menuClick.call(this, item, $(item.target).attr("url"));
+			}
+		});
 		
 		/**
 		 * 递归添加子菜单
@@ -405,7 +434,7 @@
 		function appendChild(menu) {
 			var itemText = menu.text,
 			childrens = menu.children;
-			var item = $('<div/>').append($('<span></span>').html(itemText));
+			var item = $('<div/>').append($('<span></span>').html(itemText)).attr("url", menu.href);
 			if (menu.iconCls) {
 				item.attr('iconCls', menu.iconCls);
 			}
@@ -426,8 +455,10 @@
 						citem.attr('iconCls', cmenu.iconCls);
 					}
 					item.append(ci.append(citem));
+					
 				}
 			}
+			
 			return item;
 		}
 	}
@@ -464,6 +495,12 @@
 	 * @param target
 	 */
 	function initWidget(target) {}
+	
+	function menuClick(item, url) {
+		if (item.text == "关于") {
+			$.messager.alert("提示", "这是easyui的app");
+		}
+	}
 	
 	/**
 	 * 打开默认实现
@@ -682,7 +719,14 @@
 		loaded = true;
 		
 		setTimeout(function () {
-			$('body').attr('oncontextmenu', 'return false'); //禁用全局右键菜单
+			$('body').attr({
+				oncontextmenu : 'return false',
+				onselectstart : 'return false',
+				ondragstart : 'return false',
+				onbeforecopy : 'return false',
+				oncopy : 'document.selection.empty()',
+				onselect : 'document.selection.empty()'
+			}); //禁用全局右键菜单
 		}, 500);
 	}
 	
@@ -718,8 +762,16 @@
 		},
 		appReset : function () {
 			return this.each(function () {
+				appReset(this);
+			});
+		},
+		setIconSize : function (size) {
+			return this.each(function () {
+				$.data(this, 'app').options.iconSize = size;
 				var appContainer = $.data(this, 'app').appContainer;
-				appReset(this, appContainer);
+				appContainer.find("img").height(size).width(size);
+				appContainer.find("em,li").height(size + 45).width(size + 45);
+				appReset(this);
 			});
 		}
 	};
@@ -729,9 +781,10 @@
 	$.fn.app.defaults = {
 		taskBlankPos : 'south', //任务栏的位置（north|south|west|east）
 		iconSize : 32,
-		dbclick : false,
+		dbclick : true,
 		wallpaper : null,
-		appClick:openApp,
+		appClick : openApp,
+		menuClick : menuClick,
 		loadUrl : {
 			app : 'apps.json',
 			startMenu : 'startMenu.json'
