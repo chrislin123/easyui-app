@@ -230,3 +230,6 @@ a.app-startmenu-y:hover {
 	background: url(images/taskbar-split-w.gif) left center no-repeat;
 }
 /******************************************************************/
+.app-spacer{
+	border:2px dashed #eee;
+}
