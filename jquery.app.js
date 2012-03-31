@@ -468,10 +468,10 @@
 	 * @param target
 	 */
 	function initCalendar(target) {
+		var jqTarget = $(target);
+		var opts = $.data(target, 'app').options;
+		var calendar = $.data(target, 'app')['calendar'];
 		function init() {
-			var jqTarget = $(target);
-			var opts = $.data(target, 'app').options;
-			var calendar = $.data(target, 'app')['calendar'];
 			var nowDate = new Date();
 			var year = nowDate.getFullYear();
 			var month = nowDate.getMonth() + 1;
@@ -493,6 +493,34 @@
 		window.setInterval(function() {
 			init();
 		}, 1000);
+
+		var calendarDiv = $('<div/>').appendTo('body').calendar({
+			current : new Date()
+		}).hide();
+
+		var taskBar = $.data(target, 'app')['taskBar'];
+		var t = parseInt(document.body.clientHeight) - parseInt(calendarDiv.css('height'));
+		var l = parseInt(document.body.clientWidth) - parseInt(calendarDiv.css('width'));
+		if (opts.taskBlankPos == 'south') {
+			t -= parseInt($(taskBar).css('height'));
+		} else if (opts.taskBlankPos == 'north') {
+			t = 0 + parseInt($(taskBar).css('height'));
+		} else if (opts.taskBlankPos == 'west') {
+			l = 0 + parseInt($(taskBar).css('width'));
+		} else {
+			l -= parseInt($(taskBar).css('width'));
+		}
+		calendarDiv.css({
+			"top" : t,
+			"left" : l,
+			"position" : "absolute"
+		});
+
+		calendar.toggle(function() {
+			calendarDiv.show();
+		}, function() {
+			calendarDiv.hide();
+		});
 	}
 	
 	/**
