@@ -516,10 +516,8 @@
 			"position" : "absolute"
 		});
 
-		calendar.toggle(function() {
-			calendarDiv.show();
-		}, function() {
-			calendarDiv.hide();
+		calendar.click(function() {
+			calendarDiv.slideToggle();
 		});
 	}
 	

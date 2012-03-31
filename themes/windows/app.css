@@ -182,6 +182,11 @@ img {
 .app-taskbar-calendar-x {
 	color: white;
 	text-align: center;
+	position: absolute;
+	right: 2px;
+	top:2px;
+	_top:4px;
+	cursor: default;
 }
 .app-taskbar-calendar-y {
 	position: absolute;
@@ -189,6 +194,7 @@ img {
 	text-align: center;
 	bottom: 0px;
 	color: white;
+	cursor: default;
 }
 /******************************************************************/
 a.app-startmenu-x:link,
