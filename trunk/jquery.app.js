@@ -519,6 +519,12 @@
 		calendar.click(function() {
 			calendarDiv.slideToggle();
 		});
+		jqTarget.click(function(e){
+			var c = $(e.target).attr('class');	
+			if(c != 'app-taskbar-calendar-x' && c != 'app-taskbar-calendar-y'){
+				calendarDiv.hide();
+			}
+		});
 	}
 	
 	/**
