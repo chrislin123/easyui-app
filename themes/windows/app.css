@@ -141,12 +141,6 @@ img {
 .app-scroller-bottom {
 	z-index: 1;
 }
-.app-taskbar-calendar-x {
-	float: right;
-	color: white;
-	padding-right: 2px;
-	text-align: center;
-}
 .app-list-wrap {
 	position: relative;
 	left: 0px;
@@ -185,14 +179,16 @@ img {
 .app-list-list li.selected{
 	font-weight:bolder;
 }
+.app-taskbar-calendar-x {
+	color: white;
+	text-align: center;
+}
 .app-taskbar-calendar-y {
 	position: absolute;
 	vertical-align: middle;
 	text-align: center;
-	bottom: 1px;
+	bottom: 0px;
 	color: white;
-	text-align: center;
-	bottom: 1px;
 }
 /******************************************************************/
 a.app-startmenu-x:link,
