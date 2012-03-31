@@ -121,7 +121,7 @@
 		var tasklist = $.data(target, 'app').tasklist;
 		
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
-			tasklist.width(taskBlank.width() - 120);
+			tasklist.width(taskBlank.width() - 130);
 		} else {
 			tasklist.height(taskBlank.height() - 75);
 		}
@@ -481,11 +481,16 @@
 			if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
 				calendar.html(year + '年' + month + '月' + date + '日<br/>' + time);
 			} else {
-				calendar.html(nowDate.getHours() + ':' + nowDate.getMinutes());
+				var t = nowDate.getHours() + ':';
+				if (nowDate.getMinutes() < 10) {
+					t += '0';
+				}
+				t += nowDate.getMinutes();
+				calendar.html(t);
 			}
 		}
 		init();
-		window.setInterval(function () {
+		window.setInterval(function() {
 			init();
 		}, 1000);
 	}
