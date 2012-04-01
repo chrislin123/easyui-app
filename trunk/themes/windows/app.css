@@ -164,20 +164,24 @@ img {
 	margin-bottom: -1px;
 	padding: 0;
 	position: relative;
-	border: 1px solid #8DB2E3;
 	radius: 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 	height: 25px;
+	width: 100px;
 	line-height: 25px;
 	text-align: center;
 	white-space: nowrap;
 	padding: 0px 10px;
 	color: #FFF;
-	cursor: default;
+	cursor: pointer;
+	background: url(images/taskbg.png) no-repeat;
 }
 .app-list-list li.selected{
+	width: 100px;
 	font-weight:bolder;
+	cursor: pointer;
+	background: url(images/taskbg-select.png) no-repeat;
 }
 .app-taskbar-calendar-x {
 	color: white;
