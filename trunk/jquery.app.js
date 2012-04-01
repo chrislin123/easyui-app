@@ -552,7 +552,6 @@
 		var thisAppwindow = $('div[w_id="' + uuid + '"]', wall);
 		if (thisAppwindow.length) {
 			thisAppwindow.dialog('open');
-			appendToList(uuid, appOpt.text, true)
 			return;
 		}
 		
@@ -573,6 +572,9 @@
 			inline : true,
 			cache : false,
 			shadow : false,
+			onOpen:function(){
+				appendToList($(this).attr('w_id'),$.data(this, 'panel').options.title);
+			},
 			onClose : function () {
 				var frame = $('iframe', this);
 				if (frame.length > 0) { //释放iframe
@@ -640,11 +642,16 @@
 			appWindow.find('.dialog-content').append(iframe);
 		}
 		
+		appWindow.prev('div.window-header').click(function(e){
+			var tasklist = jqTarget.data('app').tasklist;
+			var list = tasklist.find('ul.app-list-list');
+			list.children().removeClass('selected');
+			$('li[l_id="' + uuid + '"]', list).addClass('selected');
+		});
+		
 		appWindow.click(function () {
 			$(this).dialog('open');
 		});
-		
-		appendToList(uuid, appOpt.text, false);
 		
 		/**
 		 * 添加任务栏站位
@@ -652,14 +659,13 @@
 		 * @param text
 		 * @param status
 		 */
-		function appendToList(uuid, text, status) {
+		function appendToList(uuid, text) {
 			var tasklist = jqTarget.data('app').tasklist;
 			var list = tasklist.find('ul.app-list-list');
 			var wrap = list.parent();
 			list.children().removeClass('selected');
 			
-			if (status) {
-				$('div[w_id="' + uuid + '"]', wall).dialog('open');
+			if ($('li[l_id="' + uuid + '"]', list).length) {
 				$('li[l_id="' + uuid + '"]', list).addClass('selected');
 			} else {
 				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text);
