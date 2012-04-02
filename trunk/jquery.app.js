@@ -13,6 +13,7 @@
  */
 (function ($) {
 	var loaded = false;
+	var opened = {};
 	
 	/**
 	 * layout初始化
@@ -73,42 +74,42 @@
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
 		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos); //获取任务栏Layou面板容器
-		var taskBar = $('<div/>').addClass('app-taskbar'); //创建任务栏对象
+		var taskBar = $('<div/>').addClass('app-taskBar'); //创建任务栏对象
 		
 		var start = $('<a onfocus="this.blur()" href="javascript:void(0)"></a>'); //开始菜单按钮
-		var tasklist = $('<div/>'); //创建任务区域
+		var taskList = $('<div/>'); //创建任务区域
 		var calendar = $('<div/>'); //创建时间区域
 		
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
-			taskBar.addClass('app-taskbar-bg1');
-			start.addClass('app-startmenu-x');
-			tasklist.addClass('app-tasklist-x');
-			calendar.addClass('app-taskbar-calendar-x');
+			taskBar.addClass('app-taskBar-bg1');
+			start.addClass('app-startMenu-x');
+			taskList.addClass('app-taskList-x');
+			calendar.addClass('app-taskBar-calendar-x');
 			
-			var scrollerLeft = $('<div/>').addClass('app-scroller-left').appendTo(tasklist);
-			var scrollerRight = $('<div/>').addClass('app-scroller-right').appendTo(tasklist);
-			var listWrap = $('<div/>').addClass('app-list-wrap').appendTo(tasklist);
+			var scrollLeft = $('<div/>').addClass('app-scroll-left').appendTo(taskList);
+			var scrollRight = $('<div/>').addClass('app-scroll-right').appendTo(taskList);
+			var listWrap = $('<div/>').addClass('app-list-wrap').appendTo(taskList);
 			var list = $('<ul/>').addClass('app-list-list').appendTo(listWrap);
 			
 		} else {
-			taskBar.addClass('app-taskbar-bg2');
-			start.addClass('app-startmenu-y');
-			tasklist.addClass('app-tasklist-y');
-			calendar.addClass('app-taskbar-calendar-y');
+			taskBar.addClass('app-taskBar-bg2');
+			start.addClass('app-startMenu-y');
+			taskList.addClass('app-taskList-y');
+			calendar.addClass('app-taskBar-calendar-y');
 			
-			var scrollerTop = $('<div/>').addClass('app-scroller-top').appendTo(tasklist);
-			var scrollerBottom = $('<div/>').addClass('app-scroller-bottom').appendTo(tasklist);
+			var scrollTop = $('<div/>').addClass('app-scroll-top').appendTo(taskList);
+			var scrollBottom = $('<div/>').addClass('app-scroll-bottom').appendTo(taskList);
 		}
 		
 		//依次添加到任务栏对象里面
 		start.appendTo(taskBar);
-		tasklist.appendTo(taskBar);
+		taskList.appendTo(taskBar);
 		calendar.appendTo(taskBar);
 		taskBar.appendTo(taskBlank);
 		
 		$.data(target, 'app')['taskBar'] = taskBar;
 		$.data(target, 'app')['start'] = start;
-		$.data(target, 'app')['tasklist'] = tasklist;
+		$.data(target, 'app')['taskList'] = taskList;
 		$.data(target, 'app')['calendar'] = calendar;
 		
 		setTaskListWidth(target);
@@ -118,12 +119,12 @@
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
 		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos); //获取任务栏Layou面板容器
-		var tasklist = $.data(target, 'app').tasklist;
+		var taskList = $.data(target, 'app')['taskList'];
 		
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
-			tasklist.width(taskBlank.width() - 130);
+			taskList.width(taskBlank.width() - 130);
 		} else {
-			tasklist.height(taskBlank.height() - 75);
+			taskList.height(taskBlank.height() - 75);
 		}
 	}
 	
@@ -203,15 +204,15 @@
 					});
 				}
 				
-				initAppDragg(appItem); //初始化app的拖拽事件
+				initAppDrag(appItem); //初始化app的拖拽事件
 				
-				if (opts.dbclick) { //绑定App的点击事件（dbclick是否双击）
+				if (opts.dbClick) { //绑定App的点击事件（dbClick是否双击）
 					appItem.on('dblclick', function () {
-						opts.appClick.call(this, target);
+						openApp.call(this, target);
 					});
 				} else {
 					appItem.on('click', function () {
-						opts.appClick.call(this, target);
+						openApp.call(this, target);
 					});
 				}
 			}
@@ -226,7 +227,7 @@
 		 * 初始化图标拖拽
 		 * @param appItem
 		 */
-		function initAppDragg(appItem) {
+		function initAppDrag(appItem) {
 			appItem.draggable({
 				revert : true,
 				cursor : "default"
@@ -490,14 +491,14 @@
 			}
 		}
 		init();
-		window.setInterval(function() {
+		window.setInterval(function () {
 			init();
 		}, 1000);
-
+		
 		var calendarDiv = $('<div/>').appendTo('body').calendar({
-			current : new Date()
-		}).hide();
-
+				current : new Date()
+			}).hide();
+		
 		var taskBar = $.data(target, 'app')['taskBar'];
 		var t = parseInt(document.body.clientHeight) - parseInt(calendarDiv.css('height'));
 		var l = parseInt(document.body.clientWidth) - parseInt(calendarDiv.css('width'));
@@ -515,13 +516,13 @@
 			"left" : l,
 			"position" : "absolute"
 		});
-
-		calendar.click(function() {
+		
+		calendar.click(function () {
 			calendarDiv.slideToggle();
 		});
-		jqTarget.click(function(e){
-			var c = $(e.target).attr('class');	
-			if(c != 'app-taskbar-calendar-x' && c != 'app-taskbar-calendar-y'){
+		jqTarget.click(function (e) {
+			var c = $(e.target).attr('class');
+			if (c != 'app-taskBar-calendar-x' && c != 'app-taskBar-calendar-y') {
 				calendarDiv.hide();
 			}
 		});
@@ -545,6 +546,7 @@
 	 */
 	function openApp(target) {
 		var jqTarget = $(target);
+		var opt = $(target).data('app').options;
 		var uuid = $(this).attr('app_id');
 		var appOpt = $(this).data("app");
 		var wall = jqTarget.layout('panel', 'center');
@@ -560,20 +562,31 @@
 		var T = opened.length * 25 + 10;
 		var L = opened.length * 25 + 300;
 		
-		var defaultConif = {
-			title : appOpt.text,
+		var customOption = opt.onBeforeOpenApp.call(target, appOpt) || {};
+		
+		var defaultConfig = {
 			height : 400,
 			width : 700,
-			top : T,
-			left : L,
 			resizable : true,
 			maximizable : true,
 			minimizable : true,
+			shadow : false,
+			top : T,
+			left : L
+		};
+		
+		var defaultRequiredConfig = {
+			title : appOpt.text,
 			inline : true,
 			cache : false,
-			shadow : false,
-			onOpen:function(){
-				appendToList($(this).attr('w_id'),$.data(this, 'panel').options.title);
+			onOpen : function () {
+				appendToList($(this).attr('w_id'), $.data(this, 'panel').options.title);
+				if (customOption.onOpen) {
+					customOption.onOpen.call(this);
+				} else {
+					if (opt.onOpenApp)
+						opt.onOpenApp.call(this);
+				}
 			},
 			onClose : function () {
 				var frame = $('iframe', this);
@@ -595,12 +608,23 @@
 				
 				removeListItem($(this).attr('w_id'));
 				
+				if (customOption.onClose) {
+					customOption.onClose.call(this);
+				} else {
+					if (opt.onClosedApp)
+						opt.onClosedApp.call(this);
+					
+				}
+				
 				$(this).dialog("destroy");
 			},
 			onMinimize : function () {
 				if ($(this).prev('.window-header').find('.panel-tool-restore').length == 1) {
 					var opts = $.data(this, 'panel').options;
 					opts.maximized = true;
+				}
+				if (customOption.onMinimize) {
+					customOption.onMinimize.call(this);
 				}
 			},
 			onMove : function (left, top) {
@@ -624,13 +648,18 @@
 						"top" : (wall.height() - 25)
 					});
 				}
+				if (customOption.onMove) {
+					customOption.onMove.call(this);
+				}
 			}
 		};
 		
+		var config = $.extend({}, defaultConfig, customOption, defaultRequiredConfig);
+		
 		if (appOpt.href && !/^http/i.test(appOpt.href)) {
-			defaultConif.href = appOpt.href;
+			config.href = appOpt.href;
 		}
-		appWindow.dialog(defaultConif);
+		appWindow.dialog(config);
 		
 		if (appOpt.href && /^http/i.test(appOpt.href)) {
 			var iframe = $('<iframe/>').attr({
@@ -642,9 +671,9 @@
 			appWindow.find('.dialog-content').append(iframe);
 		}
 		
-		appWindow.prev('div.window-header').click(function(e){
-			var tasklist = jqTarget.data('app').tasklist;
-			var list = tasklist.find('ul.app-list-list');
+		appWindow.prev('div.window-header').click(function (e) {
+			var taskList = jqTarget.data('app').taskList;
+			var list = taskList.find('ul.app-list-list');
 			list.children().removeClass('selected');
 			$('li[l_id="' + uuid + '"]', list).addClass('selected');
 		});
@@ -660,8 +689,8 @@
 		 * @param status
 		 */
 		function appendToList(uuid, text) {
-			var tasklist = jqTarget.data('app').tasklist;
-			var list = tasklist.find('ul.app-list-list');
+			var taskList = jqTarget.data('app').taskList;
+			var list = taskList.find('ul.app-list-list');
 			var wrap = list.parent();
 			list.children().removeClass('selected');
 			
@@ -676,9 +705,9 @@
 					$(this).addClass('selected');
 				});
 				
-				if (wrap.width() > tasklist.width()) {
-					wrap.width(tasklist.width());
-					$('div[class^="app-scroller-"]', tasklist).show();
+				if (wrap.width() > taskList.width()) {
+					wrap.width(taskList.width());
+					$('div[class^="app-scroll-"]', taskList).show();
 				}
 				
 				if (list.children().length != 1) {
@@ -824,9 +853,11 @@
 	$.fn.app.defaults = {
 		taskBlankPos : 'south', //任务栏的位置（north|south|west|east）
 		iconSize : 32,
-		dbclick : true,
+		dbClick : true,
 		wallpaper : null,
-		appClick : openApp,
+		onBeforeOpenApp : function (appOpt) {},
+		onOpenApp : function () {},
+		onClosedApp : function () {},
 		menuClick : menuClick,
 		loadUrl : {
 			app : 'apps.json',
