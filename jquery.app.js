@@ -27,10 +27,21 @@
 				'border' : false,
 				'region' : 'center'
 			}).addClass('app-wall').appendTo(jqTarget);
+		
+		//为桌面绑定右键菜
+		center.bind('contextmenu', function (e) {
+			var appContainer = $.data(target, 'app')['appContainer'];
+			if (e.target != appContainer[0])
+				return;
+			opts.onWallContextMenu.call(target, e);
+			e.preventDefault();
+		});
+		
 		//墙纸设置
 		if (opts.wallpaper) {
 			center.css('background-image', 'url("' + opts.wallpaper + '")');
 		}
+		
 		if (jqTarget.context.nodeName !== 'BODY') //非body对象，添加fit属性
 			jqTarget.attr('fit', true);
 		
@@ -73,12 +84,20 @@
 	function initTaskBlank(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
-		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos); //获取任务栏Layou面板容器
+		var taskBlank = jqTarget.layout('panel', opts.taskBlankPos); //获取任务栏Layout面板容器
 		var taskBar = $('<div/>').addClass('app-taskBar'); //创建任务栏对象
 		
-		var start = $('<a onfocus="this.blur()" href="javascript:void(0)"></a>'); //开始菜单按钮
+		var start = $('<span/>'); //开始菜单按钮
 		var taskList = $('<div/>'); //创建任务区域
 		var calendar = $('<div/>'); //创建时间区域
+		
+		if ($.browser.msie) { //兼容ie的hover
+			start.hover(function () {
+				$(this).addClass('app-startMenu-hover');
+			}, function () {
+				$(this).removeClass('app-startMenu-hover');
+			});
+		}
 		
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
 			taskBar.addClass('app-taskBar-bg1');
@@ -111,6 +130,15 @@
 		$.data(target, 'app')['start'] = start;
 		$.data(target, 'app')['taskList'] = taskList;
 		$.data(target, 'app')['calendar'] = calendar;
+		
+		//为taskList绑定右键菜单
+		taskList.bind('contextmenu', function (e) {
+			if (e.target.nodeName == "LI") {
+				opts.onTaskBlankContextMenu.call(target, e, $(e.target).attr('l_id'));
+			} else {
+				opts.onTaskBlankContextMenu.call(target, e, false);
+			}
+		});
 		
 		setTaskListWidth(target);
 	}
@@ -218,7 +246,15 @@
 			}
 			appContainer.appendTo(wall);
 			
-			initContextMenu();
+			var appItems = appContainer.children('li');
+			appItems.mousedown(
+				function () {
+				appItems.removeClass("select");
+				$(this).addClass("select");
+			}).bind('contextmenu', function (e) {
+				opts.onAppContextMenu.call(target, e, $(this).attr('app_id'));
+				e.preventDefault();
+			});
 			
 			$.data(target, 'app')['appContainer'] = appContainer;
 		}
@@ -244,59 +280,6 @@
 				},
 				accept : '.app-container li'
 			})
-		}
-		
-		/**
-		 * 初始化右键菜单
-		 * @param appItem
-		 */
-		function initContextMenu() {
-			var wallMenuData = [{
-					"text" : "属性",
-					"href" : "http://www.sina.com"
-				}, '-', {
-					"text" : "关于",
-					"href" : "http://www.btboys.com"
-				}
-			];
-			var appMenuData = [{
-					"text" : "打开",
-					"href" : "http://www.sina.com"
-				}, '-', {
-					"text" : "属性",
-					"href" : "http://www.btboys.com"
-				}
-			];
-			var appItems = appContainer.children();
-			var wallMenu = createMenu(target, wallMenuData);
-			var appMenu = createMenu(target, appMenuData);
-			
-			wall.mousedown(function (e) {
-				if (e.target != appContainer[0])
-					return;
-				
-				appItems.removeClass("select");
-			}).bind('contextmenu', function (e) {
-				if (e.target != appContainer[0])
-					return;
-				
-				wallMenu.menu('show', {
-					left : e.pageX,
-					top : e.pageY
-				});
-				e.preventDefault();
-			});
-			
-			appItems.mousedown(function () {
-				appItems.removeClass("select");
-				$(this).addClass("select");
-			}).bind('contextmenu', function (e) {
-				appMenu.menu('show', {
-					left : e.pageX,
-					top : e.pageY
-				});
-				e.preventDefault();
-			});
 		}
 	}
 	
@@ -364,10 +347,10 @@
 		function initMenu(menus) {
 			startMenuDiv = createMenu(target, menus);
 			
-			//添加“退出”菜单
-			startMenuDiv.menu("appendItem", {
-				id : "easyui_app_logout",
-				text : "退出"
+			startMenuDiv.menu({
+				onclick : function (item) {
+					opts.onStartMenuClick.call(target, item);
+				}
 			});
 			
 			var start = $.data(target, 'app')['start'];
@@ -403,30 +386,30 @@
 	 */
 	function createMenu(target, menus) {
 		var opts = $.data(target, 'app').options;
-		var startMenuDiv = $('<div style="width:200px;"></div>').appendTo('body');
+		var menuDiv = $('<div style="width:200px;"></div>').appendTo('body');
 		for (var i = 0; i < menus.length; i++) {
 			var menu = menus[i];
 			if (menu == '-') {
 				var sep = $('<div class="menu-sep"></div>');
-				startMenuDiv.append(sep);
+				menuDiv.append(sep);
 				continue;
 			}
 			if (menu.children) {
-				startMenuDiv.append(appendChild(menu));
+				menuDiv.append(appendChild(menu));
 			} else {
-				var item = $('<div></div>').html(menu.text).attr("url", menu.href); //未添加点击事件
+				var item = $('<div></div>').html(menu.text);
+				
+				if (menu.href)
+					item.attr("url", menu.href);
+				
 				if (menu.iconCls) {
 					item.attr('iconCls', menu.iconCls);
 				}
-				startMenuDiv.append(item);
+				menuDiv.append(item);
 			}
 		}
 		
-		return startMenuDiv.menu({
-			onClick : function (item) {
-				opts.menuClick.call(this, item, $(item.target).attr("url"));
-			}
-		});
+		return menuDiv.menu();
 		
 		/**
 		 * 递归添加子菜单
@@ -434,28 +417,36 @@
 		 */
 		function appendChild(menu) {
 			var itemText = menu.text,
-			childrens = menu.children;
-			var item = $('<div/>').append($('<span></span>').html(itemText)).attr("url", menu.href);
+			children = menu.children;
+			var item = $('<div/>').append($('<span></span>').html(itemText));
+			
+			if (menu.href)
+				item.attr("url", menu.href); //未添加点击事件
+			
 			if (menu.iconCls) {
 				item.attr('iconCls', menu.iconCls);
 			}
 			
 			var ci = $('<div style="width:200px;"></div>');
-			for (var i = 0; i < childrens.length; i++) {
-				var cmenu = childrens[i];
-				if (cmenu == '-') {
+			for (var i = 0; i < children.length; i++) {
+				var cMenu = children[i];
+				if (cMenu == '-') {
 					var sep = $('<div class="menu-sep"></div>');
-					startMenuDiv.append(sep);
+					menu.append(sep);
 					continue;
 				}
-				if (cmenu.children) {
-					item.append(ci.append(appendChild(cmenu)));
+				if (cMenu.children) {
+					item.append(ci.append(appendChild(cMenu)));
 				} else {
-					var citem = $('<div/>').html(cmenu.text).attr("url", cmenu.href); //未添加点击事件
-					if (cmenu.iconCls) {
-						citem.attr('iconCls', cmenu.iconCls);
+					var cItem = $('<div/>').html(cMenu.text);
+					
+					if (menu.href)
+						cItem.attr("url", cMenu.href);
+					
+					if (cMenu.iconCls) {
+						cItem.attr('iconCls', cMenu.iconCls);
 					}
-					item.append(ci.append(citem));
+					item.append(ci.append(cItem));
 					
 				}
 			}
@@ -472,6 +463,7 @@
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
 		var calendar = $.data(target, 'app')['calendar'];
+		
 		function init() {
 			var nowDate = new Date();
 			var year = nowDate.getFullYear();
@@ -490,6 +482,7 @@
 				calendar.html(t);
 			}
 		}
+		
 		init();
 		window.setInterval(function () {
 			init();
@@ -534,12 +527,6 @@
 	 */
 	function initWidget(target) {}
 	
-	function menuClick(item, url) {
-		if (item.text == "关于") {
-			$.messager.alert("提示", "这是easyui的app");
-		}
-	}
-	
 	/**
 	 * 打开默认实现
 	 * @param target
@@ -551,9 +538,9 @@
 		var appOpt = $(this).data("app");
 		var wall = jqTarget.layout('panel', 'center');
 		
-		var thisAppwindow = $('div[w_id="' + uuid + '"]', wall);
-		if (thisAppwindow.length) {
-			thisAppwindow.dialog('open');
+		var thisAppWindow = $('div[w_id="' + uuid + '"]', wall);
+		if (thisAppWindow.length) {
+			thisAppWindow.dialog('open');
 			return;
 		}
 		
@@ -570,9 +557,7 @@
 			resizable : true,
 			maximizable : true,
 			minimizable : true,
-			shadow : false,
-			top : T,
-			left : L
+			shadow : false
 		};
 		
 		var defaultRequiredConfig = {
@@ -739,6 +724,7 @@
 		function S4() {
 			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
 		}
+		
 		return "UUID-" + (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 	}
 	
@@ -790,6 +776,8 @@
 		$.messager.progress('close');
 		loaded = true;
 		
+		options.onLoaded.call(target);
+		
 		setTimeout(function () {
 			$('body').attr({
 				oncontextmenu : 'return false',
@@ -804,7 +792,7 @@
 	
 	$.fn.app = function (options, params) {
 		if (typeof options === 'string') {
-			return $.fn.app.methods[options].call(this, params);
+			return $.fn.app.methods[options.toLowerCase()].call(this, params);
 		}
 		options = options || {};
 		return this.each(function () {
@@ -825,19 +813,40 @@
 	
 	$.fn.app.methods = {
 		options : function () {
-			return $.data(this[0], 'app').options;
+			return this.data().app.options;
 		},
-		setWallpaper : function (wallpaperUrl) {
+		appcontainer : function () {
+			return this.data().app.appContainer;
+		},
+		calendar : function () {
+			return this.data().app.calendar;
+		},
+		start : function () {
+			return this.data().app.start;
+		},
+		taskbar : function () {
+			return this.data().app.taskBar;
+		},
+		tasklist : function () {
+			return this.data().app.taskList;
+		},
+        startmenu:function(){
+            return this.data().app.start.data().menu;
+        },
+		layout : function () {
+			return this.data().layout;
+		},
+		setwallpaper : function (wallpaperUrl) {
 			return this.each(function () {
 				setWallpaper(this, wallpaperUrl);
 			});
 		},
-		appReset : function () {
+		appreset : function () {
 			return this.each(function () {
 				appReset(this);
 			});
 		},
-		setIconSize : function (size) {
+		seticonsize : function (size) {
 			return this.each(function () {
 				$.data(this, 'app').options.iconSize = size;
 				var appContainer = $.data(this, 'app').appContainer;
@@ -845,6 +854,15 @@
 				appContainer.find("em,li").height(size + 45).width(size + 45);
 				appReset(this);
 			});
+		},
+		closeapp : function (appId) {
+			$("#" + appId).dialog("close");
+		},
+		openapp : function (appId) {
+			$("#" + appId).dialog("open");
+		},
+		createmenu : function (menuData) {
+			return createMenu(this[0], menuData);
 		}
 	};
 	
@@ -852,16 +870,20 @@
 	
 	$.fn.app.defaults = {
 		taskBlankPos : 'south', //任务栏的位置（north|south|west|east）
-		iconSize : 32,
-		dbClick : true,
-		wallpaper : null,
-		onBeforeOpenApp : function (appOpt) {},
-		onOpenApp : function () {},
-		onClosedApp : function () {},
-		menuClick : menuClick,
-		loadUrl : {
-			app : 'apps.json',
-			startMenu : 'startMenu.json'
+		iconSize : 32, //app图标大小
+		dbClick : true, //app打开是否双击
+		wallpaper : null, //壁纸,url路径
+		onTaskBlankContextMenu : function (event, appid) {}, //任务栏右键事件
+		onWallContextMenu : function (event) {}, //桌面右键事件
+		onAppContextMenu : function (event, appid) {}, //app右键事件
+		onBeforeOpenApp : function (appOpt) {}, //打开app之前的事件,可以返回自定义的窗口options
+		onLoaded : function () {}, //app实例化完成事件
+		onOpenApp : function () {}, //app打开事件
+		onClosedApp : function () {}, //app关闭事件
+		onStartMenuClick : function (item) {}, //开始菜单点击事件
+		loadUrl : { //远程数据加载路径
+			app : 'apps.json', //app数据
+			startMenu : 'startMenu.json' //开始菜单数据
 		},
 		lang : { //国际化
 			initLayout : "init layout",
