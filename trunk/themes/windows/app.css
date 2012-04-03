@@ -201,8 +201,7 @@ img {
 	cursor: default;
 }
 /******************************************************************/
-a.app-startMenu-x:link,
-a.app-startMenu-x:visited {
+span.app-startMenu-x {
 	margin-left: 5px;
 	float: left;
 	width: 30px;
@@ -210,7 +209,7 @@ a.app-startMenu-x:visited {
 	cursor: pointer;
 	background: url(images/start.png) left center no-repeat;
 }
-a.app-startMenu-y:link,a.app-startMenu-y:visited {
+span.app-startMenu-y {
 	margin-left: 4px;
 	width: 30px;
 	height: 30px;
@@ -219,21 +218,10 @@ a.app-startMenu-y:link,a.app-startMenu-y:visited {
 	top: 4px;
 	background: url(images/start.png) left center no-repeat;
 }
-a.app-startMenu-x:hover,
-a.app-startMenu-y:hover {
+span.app-startMenu-x:hover,
+span.app-startMenu-y:hover,
+span.app-startMenu-hover {
 	background: url(images/start2.png) left center no-repeat;
-}
-.app-taskBar-split-h {
-	float: left;
-	width: 10px;
-	height: 30px;
-	background: url(images/taskBar-split-h.gif) left center no-repeat;
-}
-.app-taskBar-split-w {
-	float: left;
-	width: 30px;
-	height: 10px;
-	background: url(images/taskBar-split-w.gif) left center no-repeat;
 }
 /******************************************************************/
 .app-spacer{
