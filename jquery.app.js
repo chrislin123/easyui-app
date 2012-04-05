@@ -466,13 +466,11 @@
 		
 		function init() {
 			var nowDate = new Date();
-			var year = nowDate.getFullYear();
-			var month = nowDate.getMonth() + 1;
-			var date = nowDate.getDate();
-			var day = nowDate.getDay() + 1;
-			var time = nowDate.toLocaleTimeString();
+			var date = format.call(nowDate, opts.dateFmt);
+			calendar.attr('title', format.call(nowDate, 'yyyy-MM-dd'));
+			
 			if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'north') {
-				calendar.html(year + '年' + month + '月' + date + '日<br/>' + time);
+				calendar.html(date);
 			} else {
 				var t = nowDate.getHours() + ':';
 				if (nowDate.getMinutes() < 10) {
@@ -519,6 +517,33 @@
 				calendarDiv.hide();
 			}
 		});
+		
+		function format(format) {
+			/*
+			 * eg:format="yyyy-MM-dd hh:mm:ss";
+			 */
+			if (!format) {
+				format = "yyyy-MM-dd hh:mm:ss";
+			}
+			var o = {
+				"M+" : this.getMonth() + 1, // month
+				"d+" : this.getDate(), // day
+				"h+" : this.getHours(), // hour
+				"m+" : this.getMinutes(), // minute
+				"s+" : this.getSeconds(), // second
+				"q+" : Math.floor((this.getMonth() + 3) / 3), // quarter
+				"S" : this.getMilliseconds() // millisecond
+			};
+			if (/(y+)/.test(format)) {
+				format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+			}
+			for (var k in o) {
+				if (new RegExp("(" + k + ")").test(format)) {
+					format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+				}
+			}
+			return format;
+		}
 	}
 	
 	/**
@@ -830,9 +855,9 @@
 		tasklist : function () {
 			return this.data().app.taskList;
 		},
-        startmenu:function(){
-            return this.data().app.start.data().menu;
-        },
+		startmenu : function () {
+			return this.data().app.start.data().menu;
+		},
 		layout : function () {
 			return this.data().layout;
 		},
@@ -872,6 +897,7 @@
 		taskBlankPos : 'south', //任务栏的位置（north|south|west|east）
 		iconSize : 32, //app图标大小
 		dbClick : true, //app打开是否双击
+		dateFmt : 'yyyy年MM月dd日 <br/> hh:mm:ss',//时间格式化形式
 		wallpaper : null, //壁纸,url路径
 		onTaskBlankContextMenu : function (event, appid) {}, //任务栏右键事件
 		onWallContextMenu : function (event) {}, //桌面右键事件
