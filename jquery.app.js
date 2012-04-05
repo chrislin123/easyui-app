@@ -178,9 +178,18 @@
 		left = 10;
 		
 		if (opts.loadUrl.app && !loaded) {
-			$.get(opts.loadUrl.app, function (resp) {
-				initApp(resp);
-			}, 'JSON');
+			$.ajax({
+				url:opts.loadUrl.app,
+				dataType:"JSON",
+				async:false,
+				cache:false,
+				success:function(resp){
+					initApp(resp);
+				},
+				error:function(XMLHttpRequest, textStatus, errorThrown){
+					$.messager.alert("",textStatus||errorThrown,"error");
+				}
+			});
 		}
 		
 		/**
@@ -335,9 +344,18 @@
 		var startMenuDiv;
 		
 		if (opts.loadUrl.startMenu && !loaded) {
-			$.get(opts.loadUrl.startMenu, function (menus) {
-				initMenu(menus);
-			}, 'JSON');
+			$.ajax({
+				url:opts.loadUrl.startMenu,
+				dataType:"JSON",
+				async:false,
+				cache:false,
+				success:function(resp){
+					initMenu(resp);
+				},
+				error:function(XMLHttpRequest, textStatus, errorThrown){
+					$.messager.alert("",textStatus||errorThrown,"error");
+				}
+			});
 		}
 		
 		/**
