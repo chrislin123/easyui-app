@@ -31,7 +31,7 @@
 		//为桌面绑定右键菜
 		center.bind('contextmenu', function (e) {
 			var appContainer = $.data(target, 'app')['appContainer'];
-			if (e.target != appContainer[0])
+			if (appContainer && e.target != appContainer[0])
 				return;
 			opts.onWallContextMenu.call(target, e);
 			e.preventDefault();
