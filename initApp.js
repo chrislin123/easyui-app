@@ -36,7 +36,7 @@ $(function () {
 
     appListMenu.menu({
         onClick:function (item) {
-            console.log(item);
+           
         }
     });
 
