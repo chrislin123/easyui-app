@@ -149,6 +149,10 @@
 		setTaskListWidth(target);
 	}
 	
+	/**
+	 * 设置任务栏宽度
+	 * @param target
+	 */
 	function setTaskListWidth(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
