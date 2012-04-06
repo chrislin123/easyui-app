@@ -94,7 +94,6 @@ $(function () {
 
 
     function onAppContextMenu(e,appid) {
-        alert(appid);
         appMenu.menu('show', {
             left:e.pageX,
             top:e.pageY
