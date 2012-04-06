@@ -69,16 +69,16 @@
 		//执行layout实例
 		jqTarget.layout();
 		
-		var calendarDiv = $('<div/>').appendTo('body').calendar({
+		var calendarDiv = $('<div/>').appendTo(center).calendar({
 				current : new Date()
 			}).hide();//插入calendar占位
+			
 		$.data(target, 'app')['calendarDiv'] = calendarDiv;
 		
 		center.panel({
 			onResize : function (width, height) {
 				appReset(target);
 				setTaskListWidth(target);
-				setCalendarTopAndLeft(target);
 			}
 		});
 	}
@@ -479,28 +479,25 @@
 		}
 	}
 	
+	/**
+	 * 设置时间位置
+	 * @param target
+	 */
 	function setCalendarTopAndLeft(target){
 		var calendarDiv = $.data(target, 'app')['calendarDiv'];
-		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
-		var calendar = $.data(target, 'app')['calendar'];
-		var taskBar = $.data(target, 'app')['taskBar'];
-		var t = parseInt(document.body.clientHeight) - parseInt(calendarDiv.css('height'));
-		var l = parseInt(document.body.clientWidth) - parseInt(calendarDiv.css('width'));
-		if (opts.taskBlankPos == 'south') {
-			t -= parseInt($(taskBar).css('height'));
-		} else if (opts.taskBlankPos == 'north') {
-			t = 0 + parseInt($(taskBar).css('height'));
-		} else if (opts.taskBlankPos == 'west') {
-			l = 0 + parseInt($(taskBar).css('width'));
-		} else {
-			l -= parseInt($(taskBar).css('width'));
+		var css = {"position" : "absolute"};
+		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'east') {
+			css['bottom'] = 0;
+			css['right'] = 0;
+		} else if(opts.taskBlankPos == 'west'){
+			css['bottom'] =0;
+			css['left'] = 0;
+		}else{
+			css['top'] = 0;
+			css['right'] = 0;
 		}
-		calendarDiv.css({
-			"top" : t,
-			"left" : l,
-			"position" : "absolute"
-		});
+		calendarDiv.css(css);
 	}
 	
 	/**
