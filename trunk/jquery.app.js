@@ -13,8 +13,8 @@
  */
 (function ($) {
 	var loaded = false;
-	var opened = {};
-	
+	var prevOpenedApp,
+	currentOpenedApp;
 	/**
 	 * layout初始化
 	 * @param target
@@ -71,8 +71,11 @@
 		
 		var calendarDiv = $('<div/>').appendTo(center).calendar({
 				current : new Date()
-			}).hide().css({"position" : "absolute","z-index":100});//插入calendar占位
-			
+			}).hide().css({
+				"position" : "absolute",
+				"z-index" : 100
+			}); //插入calendar占位
+		
 		$.data(target, 'app')['calendarDiv'] = calendarDiv;
 		
 		center.panel({
@@ -189,15 +192,15 @@
 		
 		if (opts.loadUrl.app && !loaded) {
 			$.ajax({
-				url:opts.loadUrl.app,
-				dataType:"JSON",
-				async:false,
-				cache:false,
-				success:function(resp){
+				url : opts.loadUrl.app,
+				dataType : "JSON",
+				async : false,
+				cache : false,
+				success : function (resp) {
 					initApp(resp);
 				},
-				error:function(XMLHttpRequest, textStatus, errorThrown){
-					$.messager.alert("",textStatus||errorThrown,"error");
+				error : function (XMLHttpRequest, textStatus, errorThrown) {
+					$.messager.alert("", textStatus || errorThrown, "error");
 				}
 			});
 		}
@@ -355,15 +358,15 @@
 		
 		if (opts.loadUrl.startMenu && !loaded) {
 			$.ajax({
-				url:opts.loadUrl.startMenu,
-				dataType:"JSON",
-				async:false,
-				cache:false,
-				success:function(resp){
+				url : opts.loadUrl.startMenu,
+				dataType : "JSON",
+				async : false,
+				cache : false,
+				success : function (resp) {
 					initMenu(resp);
 				},
-				error:function(XMLHttpRequest, textStatus, errorThrown){
-					$.messager.alert("",textStatus||errorThrown,"error");
+				error : function (XMLHttpRequest, textStatus, errorThrown) {
+					$.messager.alert("", textStatus || errorThrown, "error");
 				}
 			});
 		}
@@ -487,17 +490,17 @@
 	 * 设置时间位置
 	 * @param target
 	 */
-	function setCalendarTopAndLeft(target){
+	function setCalendarTopAndLeft(target) {
 		var calendarDiv = $.data(target, 'app')['calendarDiv'];
 		var opts = $.data(target, 'app').options;
 		var css = {};
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'east') {
 			css['bottom'] = 0;
 			css['right'] = 0;
-		} else if(opts.taskBlankPos == 'west'){
-			css['bottom'] =0;
+		} else if (opts.taskBlankPos == 'west') {
+			css['bottom'] = 0;
 			css['left'] = 0;
-		}else{
+		} else {
 			css['top'] = 0;
 			css['right'] = 0;
 		}
@@ -600,9 +603,6 @@
 		}
 		
 		var appWindow = $('<div/>').attr('w_id', uuid).appendTo(wall);
-		var opened = wall.children('div.window');
-		var T = opened.length * 25 + 10;
-		var L = opened.length * 25 + 300;
 		
 		var customOption = opt.onBeforeOpenApp.call(target, appOpt) || {};
 		
@@ -614,6 +614,17 @@
 			minimizable : true,
 			shadow : false
 		};
+		
+		var opened = $('div[w_id]', wall).length;
+		
+		if (opened > 1) {
+			var T = opened * 25 + 10;
+			var L = opened * 25 + 300;
+			defaultConfig = $.extend(defaultConfig, {
+					top : T,
+					left : L
+				});
+		}
 		
 		var defaultRequiredConfig = {
 			title : appOpt.text,
@@ -627,6 +638,9 @@
 					if (opt.onOpenApp)
 						opt.onOpenApp.call(this);
 				}
+				
+				prevOpenedApp = currentOpenedApp;
+				currentOpenedApp = $(this).attr('w_id');
 			},
 			onClose : function () {
 				var frame = $('iframe', this);
@@ -657,6 +671,7 @@
 				}
 				
 				$(this).dialog("destroy");
+				$('li[l_id="' + prevOpenedApp + '"]').addClass('selected');
 			},
 			onMinimize : function () {
 				if ($(this).prev('.window-header').find('.panel-tool-restore').length == 1) {
@@ -690,6 +705,12 @@
 				}
 				if (customOption.onMove) {
 					customOption.onMove.call(this);
+				}
+			},
+			onMaximize : function () {
+				$(this).closest('.window').css("z-index", $.fn.window.defaults.zIndex++);
+				if (customOption.onMaximize) {
+					customOption.onMaximize.call(this);
 				}
 			}
 		};
@@ -927,7 +948,7 @@
 		taskBlankPos : 'south', //任务栏的位置（north|south|west|east）
 		iconSize : 32, //app图标大小
 		dbClick : true, //app打开是否双击
-		dateFmt : 'yyyy年MM月dd日 <br/> hh:mm:ss',//时间格式化形式
+		dateFmt : 'yyyy年MM月dd日 <br/> hh:mm:ss', //时间格式化形式
 		wallpaper : null, //壁纸,url路径
 		onTaskBlankContextMenu : function (event, appid) {}, //任务栏右键事件
 		onWallContextMenu : function (event) {}, //桌面右键事件
