@@ -71,7 +71,7 @@
 		
 		var calendarDiv = $('<div/>').appendTo(center).calendar({
 				current : new Date()
-			}).hide();//插入calendar占位
+			}).hide().css({"position" : "absolute","z-index":100});//插入calendar占位
 			
 		$.data(target, 'app')['calendarDiv'] = calendarDiv;
 		
@@ -490,7 +490,7 @@
 	function setCalendarTopAndLeft(target){
 		var calendarDiv = $.data(target, 'app')['calendarDiv'];
 		var opts = $.data(target, 'app').options;
-		var css = {"position" : "absolute"};
+		var css = {};
 		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'east') {
 			css['bottom'] = 0;
 			css['right'] = 0;
