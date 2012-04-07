@@ -227,3 +227,8 @@ span.app-startMenu-hover {
 .app-spacer{
 	border:2px dashed #eee;
 }
+.app-widget{
+	position: absolute;
+	right: 0;
+cursor: default;
+}
