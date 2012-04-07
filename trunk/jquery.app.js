@@ -583,7 +583,65 @@
 	 * 初始化widget
 	 * @param target
 	 */
-	function initWidget(target) {}
+	function initWidget(target) {
+		var jqTarget = $(target);
+		var opts = $(target).data('app').options;
+		var wall = jqTarget.layout('panel', 'center'); //桌面对象
+		
+		var css = {},
+		axis = "v";
+		if (opts.taskBlankPos == 'south' || opts.taskBlankPos == 'west') {
+			css['top'] = 0;
+			css['right'] = 0;
+		} else if (opts.taskBlankPos == 'east') {
+			css['top'] = 0;
+			css['left'] = 0;
+		} else {
+			css['bottom'] = 0;
+			css['right'] = 0;
+			axis = "h";
+		}
+		
+		if (opts.loadUrl.widget && !loaded) {
+			$.ajax({
+				url : opts.loadUrl.widget,
+				dataType : "JSON",
+				async : false,
+				cache : false,
+				success : function (resp) {
+					init(resp);
+				},
+				error : function (XMLHttpRequest, textStatus, errorThrown) {
+					$.messager.alert("", textStatus || errorThrown, "error");
+				}
+			});
+		}
+		
+		function init(resp) {
+			$.each(resp, function () {
+				var w = $("<div/>").addClass("app-widget").css(css);
+				
+				if (this.style) {
+					w.attr("style", this.style);
+				}
+				if (this.cls) {
+					w.addClass(this.cls);
+				}
+				
+				if (this.href) {
+					w.load(this.href);
+				} else if (this.content) {
+					w.html(this.content);
+				}
+				
+				w.appendTo(wall);
+				w.draggable({
+					cursor : "default",
+					axis : axis
+				});
+			});
+		}
+	}
 	
 	/**
 	 * 打开默认实现
@@ -960,7 +1018,8 @@
 		onStartMenuClick : function (item) {}, //开始菜单点击事件
 		loadUrl : { //远程数据加载路径
 			app : 'apps.json', //app数据
-			startMenu : 'startMenu.json' //开始菜单数据
+			startMenu : 'startMenu.json', //开始菜单数据
+			widget : 'widget.json'
 		},
 		lang : { //国际化
 			initLayout : "init layout",
