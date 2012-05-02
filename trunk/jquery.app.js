@@ -379,7 +379,7 @@
 			startMenuDiv = createMenu(target, menus);
 			
 			startMenuDiv.menu({
-				onclick : function (item) {
+				onClick : function (item) {
 					opts.onStartMenuClick.call(target, item);
 				}
 			});
