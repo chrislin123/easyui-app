@@ -797,10 +797,6 @@
 			$('li[l_id="' + uuid + '"]', list).addClass('selected');
 		});
 		
-		appWindow.click(function () {
-			$(this).dialog('open');
-		});
-		
 		/**
 		 * 添加任务栏站位
 		 * @param uuid
