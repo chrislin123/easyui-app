@@ -739,6 +739,7 @@
 				if (customOption.onMinimize) {
 					customOption.onMinimize.call(this);
 				}
+				$('li[l_id="' + $(this).attr('w_id') + '"]').attr('status','closed');
 			},
 			onMove : function (left, top) {
 				var opts = $.data(this, 'panel').options;
@@ -815,9 +816,25 @@
 				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text);
 				list.append(item);
 				item.click(function () {
-					$('div[w_id="' + uuid + '"]', wall).dialog('open');
-					list.children().removeClass('selected');
-					$(this).addClass('selected');
+					if($(this).attr('status')=='opened'){
+						$(this).attr('status','closed');
+						var currentWin = $('div[w_id="' + uuid + '"]', wall);
+						var currentWinZindex =  parseInt(currentWin.parent().css("z-index"))+1;
+						if(currentWinZindex != $.fn.window.defaults.zIndex){
+							currentWin.parent().css("z-index",$.fn.window.defaults.zIndex++);
+						}else{
+							currentWin.animate({
+								opacity:'show'
+							},'slow',function(){
+								$(this).window('minimize');
+							});
+						}
+					}else{
+						$(this).attr('status','opened');
+						$('div[w_id="' + uuid + '"]', wall).window();
+						list.children().removeClass('selected');
+						$(this).addClass('selected');
+					}
 				});
 				
 				if (wrap.width() > taskList.width()) {
