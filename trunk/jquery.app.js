@@ -773,7 +773,7 @@
 			}
 		};
 		
-		var config = $.extend({}, defaultConfig, customOption, defaultRequiredConfig);
+		var config = $.extend({}, defaultConfig, opt.cnf,customOption, defaultRequiredConfig);
 		
 		if (appOpt.href && !/^http/i.test(appOpt.href)) {
 			config.href = appOpt.href;
