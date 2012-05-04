@@ -728,7 +728,7 @@
 					
 				}
 				
-				$(this).dialog("destroy");
+				$(this).window("destroy");
 				$('li[l_id="' + prevOpenedApp + '"]').addClass('selected');
 			},
 			onMinimize : function () {
@@ -743,20 +743,20 @@
 			onMove : function (left, top) {
 				var opts = $.data(this, 'panel').options;
 				if (top < 0) {
-					$(this).dialog("move", {
+					$(this).window("move", {
 						"left" : left,
 						"top" : 0
 					});
-					$(this).dialog("maximize");
+					$(this).window("maximize");
 				} else if (opts.maximized) {
-					$(this).dialog("restore");
-					$(this).dialog("move", {
+					$(this).window("restore");
+					$(this).window("move", {
 						"left" : left + 100,
 						"top" : top
 					});
 				}
 				if (top > wall.height()) {
-					$(this).dialog("move", {
+					$(this).window("move", {
 						"left" : left,
 						"top" : (wall.height() - 25)
 					});
@@ -778,7 +778,7 @@
 		if (appOpt.href && !/^http/i.test(appOpt.href)) {
 			config.href = appOpt.href;
 		}
-		appWindow.dialog(config);
+		appWindow.window(config);
 		
 		if (appOpt.href && /^http/i.test(appOpt.href)) {
 			var iframe = $('<iframe/>').attr({
@@ -787,7 +787,7 @@
 					frameborder : 0,
 					src : appOpt.href
 				});
-			appWindow.find('.dialog-content').append(iframe);
+			appWindow.find('.window-body').append(iframe);
 		}
 		
 		appWindow.prev('div.window-header').click(function (e) {
