@@ -811,7 +811,7 @@
 			list.children().removeClass('selected');
 			
 			if ($('li[l_id="' + uuid + '"]', list).length) {
-				$('li[l_id="' + uuid + '"]', list).addClass('selected');
+				$('li[l_id="' + uuid + '"]', list).addClass('selected').attr('status','opened');
 			} else {
 				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text);
 				list.append(item);
