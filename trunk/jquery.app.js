@@ -656,7 +656,7 @@
 		
 		var thisAppWindow = $('div[w_id="' + uuid + '"]', wall);
 		if (thisAppWindow.length) {
-			thisAppWindow.dialog('open');
+			thisAppWindow.window('open');
 			return;
 		}
 		
