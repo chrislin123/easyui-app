@@ -546,7 +546,7 @@
 		});
 		jqTarget.click(function (e) {
 			var c = $(e.target).attr('class');
-			if (c != 'app-taskBar-calendar-x' && c != 'app-taskBar-calendar-y') {
+			if (c != 'app-taskBar-calendar-x' && c != 'app-taskBar-calendar-y' && !$.contains(calendarDiv[0],e.target)) {
 				calendarDiv.hide();
 			}
 		});
