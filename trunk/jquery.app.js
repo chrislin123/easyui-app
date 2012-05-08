@@ -699,6 +699,7 @@
 				
 				prevOpenedApp = currentOpenedApp;
 				currentOpenedApp = $(this).attr('w_id');
+				$('li[l_id="' + $(this).attr('w_id') + '"]').attr('status','opened');
 			},
 			onClose : function () {
 				var frame = $('iframe', this);
@@ -811,9 +812,9 @@
 			list.children().removeClass('selected');
 			
 			if ($('li[l_id="' + uuid + '"]', list).length) {
-				$('li[l_id="' + uuid + '"]', list).addClass('selected').attr('status','opened');
+				$('li[l_id="' + uuid + '"]', list).addClass('selected');
 			} else {
-				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text);
+				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text).attr('status','opened');
 				list.append(item);
 				item.click(function () {
 					if($(this).attr('status')=='opened'){
@@ -912,7 +913,7 @@
 			});
 		
 		var progressBar = $.messager.progress('bar'); //获取进度条实例
-		
+		$.ajaxSetup({async: false});
 		for (var i in initMethods) {
 			var step = initMethods[i];
 			progressBar.progressbar({
@@ -921,6 +922,7 @@
 			step.call(this, target);
 		}
 		$.messager.progress('close');
+		$.ajaxSetup({async: true});
 		loaded = true;
 		
 		options.onLoaded.call(target);
