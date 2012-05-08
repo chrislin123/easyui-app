@@ -546,7 +546,7 @@
 		});
 		jqTarget.click(function (e) {
 			var c = $(e.target).attr('class');
-			if (c != 'app-taskBar-calendar-x' && c != 'app-taskBar-calendar-y' && !$.contains(calendarDiv[0],e.target)) {
+			if (c != 'app-taskBar-calendar-x' && c != 'app-taskBar-calendar-y' && !$.contains(calendarDiv[0], e.target)) {
 				calendarDiv.hide();
 			}
 		});
@@ -699,7 +699,7 @@
 				
 				prevOpenedApp = currentOpenedApp;
 				currentOpenedApp = $(this).attr('w_id');
-				$('li[l_id="' + $(this).attr('w_id') + '"]').attr('status','opened');
+				$('li[l_id="' + $(this).attr('w_id') + '"]').attr('status', 'opened');
 			},
 			onClose : function () {
 				var frame = $('iframe', this);
@@ -740,7 +740,7 @@
 				if (customOption.onMinimize) {
 					customOption.onMinimize.call(this);
 				}
-				$('li[l_id="' + $(this).attr('w_id') + '"]').attr('status','closed');
+				$('li[l_id="' + $(this).attr('w_id') + '"]').attr('status', 'closed');
 			},
 			onMove : function (left, top) {
 				var opts = $.data(this, 'panel').options;
@@ -775,7 +775,7 @@
 			}
 		};
 		
-		var config = $.extend({}, defaultConfig, appOpt.cnf,customOption, defaultRequiredConfig);
+		var config = $.extend({}, defaultConfig, appOpt.cnf, customOption, defaultRequiredConfig);
 		
 		if (appOpt.href && !/^http/i.test(appOpt.href)) {
 			config.href = appOpt.href;
@@ -814,24 +814,24 @@
 			if ($('li[l_id="' + uuid + '"]', list).length) {
 				$('li[l_id="' + uuid + '"]', list).addClass('selected');
 			} else {
-				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text).attr('status','opened');
+				var item = $('<li/>').attr("l_id", uuid).addClass('selected').text(text).attr('status', 'opened');
 				list.append(item);
 				item.click(function () {
-					if($(this).attr('status')=='opened'){
+					if ($(this).attr('status') == 'opened') {
 						var currentWin = $('div[w_id="' + uuid + '"]', wall);
-						var currentWinZindex =  parseInt(currentWin.parent().css("z-index"))+1;
-						if(currentWinZindex != $.fn.window.defaults.zIndex){
-							currentWin.parent().css("z-index",$.fn.window.defaults.zIndex++);
-						}else{
-							$(this).attr('status','closed');
+						var currentWinZindex = parseInt(currentWin.parent().css("z-index")) + 1;
+						if (currentWinZindex != $.fn.window.defaults.zIndex) {
+							currentWin.parent().css("z-index", $.fn.window.defaults.zIndex++);
+						} else {
+							$(this).attr('status', 'closed');
 							currentWin.animate({
-								opacity:'show'
-							},'slow',function(){
+								opacity : 'show'
+							}, 'slow', function () {
 								$(this).window('minimize');
 							});
 						}
-					}else{
-						$(this).attr('status','opened');
+					} else {
+						$(this).attr('status', 'opened');
 						$('div[w_id="' + uuid + '"]', wall).window();
 						list.children().removeClass('selected');
 						$(this).addClass('selected');
@@ -913,7 +913,9 @@
 			});
 		
 		var progressBar = $.messager.progress('bar'); //获取进度条实例
-		$.ajaxSetup({async: false});
+		$.ajaxSetup({
+			async : false
+		});
 		for (var i in initMethods) {
 			var step = initMethods[i];
 			progressBar.progressbar({
@@ -922,7 +924,9 @@
 			step.call(this, target);
 		}
 		$.messager.progress('close');
-		$.ajaxSetup({async: true});
+		$.ajaxSetup({
+			async : true
+		});
 		loaded = true;
 		
 		options.onLoaded.call(target);
