@@ -9,7 +9,7 @@
  *    70168958（500人超级群）
  *    腾讯微博群号：83952631
  *    社区： http://bbs.btboys.com
- * version: 0.1
+ * version: 0.2
  */
 (function ($) {
 	var loaded = false;
