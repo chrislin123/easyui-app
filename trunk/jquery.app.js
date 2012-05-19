@@ -932,14 +932,19 @@
 		options.onLoaded.call(target);
 		
 		setTimeout(function () {
-			$('body').attr({
+			$('body').attr({//禁用全局事件
 				oncontextmenu : 'return false',
 				onselectstart : 'return false',
 				ondragstart : 'return false',
-				onbeforecopy : 'return false',
-				oncopy : 'document.selection.empty()',
-				onselect : 'document.selection.empty()'
-			}); //禁用全局右键菜单
+				onbeforecopy : 'return false'
+			}).css({"-moz-user-select":"none","-webkit-user-select":"none"}); 
+			//兼容ie火狐的文本选择禁用
+			if(document.selection){
+				$('body').attr({
+					oncopy : 'document.selection.empty()',
+					onselect : 'document.selection.empty()'
+				});
+			}
 		}, 500);
 	}
 	
