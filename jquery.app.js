@@ -471,7 +471,7 @@
 				} else {
 					var cItem = $('<div/>').html(cMenu.text);
 					
-					if (menu.href)
+					if (cMenu.href)
 						cItem.attr("url", cMenu.href);
 					
 					if (cMenu.iconCls) {
