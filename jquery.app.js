@@ -178,6 +178,34 @@
 		var opts = $.data(target, 'app').options;
 		var wall = jqTarget.layout('panel', 'center'); //桌面对象
 		var appContainer = $('<ul/>').addClass('app-container'); //app容器
+		appContainer.appendTo(wall);
+		$.data(target, 'app')['appContainer'] = appContainer;
+		
+		if (opts.loadUrl.app && !loaded) {
+			$.ajax({
+				url : opts.loadUrl.app,
+				dataType : "JSON",
+				async : false,
+				cache : false,
+				success : function (resp) {
+					initApp(target, resp);
+				},
+				error : function (XMLHttpRequest, textStatus, errorThrown) {
+					$.messager.alert("", textStatus || errorThrown, "error");
+				}
+			});
+		}
+	}
+	
+	/**
+	 * 初始app
+	 * @param apps
+	 */
+	function initApp(target, apps) {
+		var jqTarget = $(target);
+		var opts = $.data(target, 'app').options;
+		var wall = jqTarget.layout('panel', 'center'); //桌面对象
+		var appContainer = jqTarget.data().app.appContainer;
 		
 		var lines = Math.floor((wall.height() - 20) / (opts.iconSize + 45)); //可显示行数
 		var columns = Math.floor((wall.width() - 20) / (opts.iconSize + 45)); //可显示列数
@@ -190,118 +218,123 @@
 		top = 20,
 		left = 10;
 		
-		if (opts.loadUrl.app && !loaded) {
+		var relSize = opts.iconSize + 45;
+		for (var i in apps) {
+			if (line > lines) {
+				line = 1;
+				top = 20;
+				left += relSize + columnAppBlank;
+				col++;
+			}
+			
+			var app = apps[i];
+			
+			var appItem = $('<li/>').css({
+					height : relSize,
+					width : relSize
+				});
+			
+			appItem.data('app', app); //绑定每个app的详细信息到app元素上
+			appItem.attr("app_id", UUID()); //指定app的唯一标识
+			if (app.id) {
+				appItem.attr("id", app.id);
+			}
+			
+			appItem.css({
+				left : left,
+				top : top
+			});
+			
+			var icon = $('<img/>').height(opts.iconSize).width(opts.iconSize).attr('src', app.icon).appendTo(appItem);
+			var text = $('<span/>').text(app.text).appendTo(appItem);
+			var em = $('<em/>').css({
+					height : relSize,
+					width : relSize
+				}).appendTo(appItem);
+			
+			appItem.appendTo(appContainer);
+			
+			top += relSize + lineAppBlank; //下一行的top值
+			line++;
+			
+			if ($.browser.msie) { //兼容ie的hover
+				appItem.hover(function () {
+					$(this).addClass('hover');
+				}, function () {
+					$(this).removeClass('hover');
+				});
+			}
+			
+			initAppDrag(target, appItem); //初始化app的拖拽事件
+			
+			if (opts.dbClick) { //绑定App的点击事件（dbClick是否双击）
+				appItem.on('dblclick', function () {
+					openApp.call(this, target);
+				});
+			} else {
+				appItem.on('click', function () {
+					openApp.call(this, target);
+				});
+			}
+		}
+		
+		var appItems = appContainer.children('li');
+		appItems.mousedown(
+			function () {
+			appItems.removeClass("select");
+			$(this).addClass("select");
+		}).bind('contextmenu', function (e) {
+			opts.onAppContextMenu.call(target, e, $(this).attr('app_id'));
+			e.preventDefault();
+		});
+	}
+	
+	/**
+	 * 初始化图标拖拽
+	 * @param target
+	 * @param appItem
+	 */
+	function initAppDrag(target, appItem) {
+		appItem.draggable({
+			revert : true,
+			cursor : "default"
+		}).droppable({
+			onDrop : function (e, source) {
+				if ($(source).prev().attr('app_id') == $(this).attr('app_id')) {
+					$(source).insertBefore(this);
+				} else {
+					$(source).insertAfter(this);
+				}
+				setTimeout(function () {
+					appReset(target);
+				}, 0);
+			},
+			accept : '.app-container li'
+		})
+	}
+	/**
+	 * 刷新APP
+	 * @param target
+	 * @param appContainer
+	 */
+	function refresh(target, href) {
+		var jqTarget = $(target);
+		var opts = $.data(target, 'app').options;
+		href = href || opts.loadUrl.app;
+		if (href) {
 			$.ajax({
-				url : opts.loadUrl.app,
+				url : href,
 				dataType : "JSON",
 				async : false,
 				cache : false,
 				success : function (resp) {
-					initApp(resp);
+					jqTarget.data().app.appContainer.empty();
+					initApp(target, resp);
 				},
 				error : function (XMLHttpRequest, textStatus, errorThrown) {
 					$.messager.alert("", textStatus || errorThrown, "error");
 				}
 			});
-		}
-		
-		/**
-		 * 初始app
-		 * @param apps
-		 */
-		function initApp(apps) {
-			var relSize = opts.iconSize + 45;
-			for (var i in apps) {
-				if (line > lines) {
-					line = 1;
-					top = 20;
-					left += relSize + columnAppBlank;
-					col++;
-				}
-				
-				var app = apps[i];
-				
-				var appItem = $('<li/>').css({
-						height : relSize,
-						width : relSize
-					});
-				
-				appItem.data('app', app); //绑定每个app的详细信息到app元素上
-				appItem.attr("app_id", UUID()); //指定app的唯一标识
-				
-				appItem.css({
-					left : left,
-					top : top
-				});
-				
-				var icon = $('<img/>').height(opts.iconSize).width(opts.iconSize).attr('src', app.icon).appendTo(appItem);
-				var text = $('<span/>').text(app.text).appendTo(appItem);
-				var em = $('<em/>').css({
-						height : relSize,
-						width : relSize
-					}).appendTo(appItem);
-				
-				appItem.appendTo(appContainer);
-				
-				top += relSize + lineAppBlank; //下一行的top值
-				line++;
-				
-				if ($.browser.msie) { //兼容ie的hover
-					appItem.hover(function () {
-						$(this).addClass('hover');
-					}, function () {
-						$(this).removeClass('hover');
-					});
-				}
-				
-				initAppDrag(appItem); //初始化app的拖拽事件
-				
-				if (opts.dbClick) { //绑定App的点击事件（dbClick是否双击）
-					appItem.on('dblclick', function () {
-						openApp.call(this, target);
-					});
-				} else {
-					appItem.on('click', function () {
-						openApp.call(this, target);
-					});
-				}
-			}
-			appContainer.appendTo(wall);
-			
-			var appItems = appContainer.children('li');
-			appItems.mousedown(
-				function () {
-				appItems.removeClass("select");
-				$(this).addClass("select");
-			}).bind('contextmenu', function (e) {
-				opts.onAppContextMenu.call(target, e, $(this).attr('app_id'));
-				e.preventDefault();
-			});
-			
-			$.data(target, 'app')['appContainer'] = appContainer;
-		}
-		
-		/**
-		 * 初始化图标拖拽
-		 * @param appItem
-		 */
-		function initAppDrag(appItem) {
-			appItem.draggable({
-				revert : true,
-				cursor : "default"
-			}).droppable({
-				onDrop : function (e, source) {
-					if ($(source).prev().attr('app_id') == $(this).attr('app_id')) {
-						$(source).insertBefore(this);
-					} else {
-						$(source).insertAfter(this);
-					}
-					setTimeout(function () {
-						appReset(target);
-					}, 0);
-				},
-				accept : '.app-container li'
-			})
 		}
 	}
 	
@@ -353,8 +386,6 @@
 	function initStartMenu(target) {
 		var jqTarget = $(target);
 		var opts = $.data(target, 'app').options;
-		var wall = jqTarget.layout('panel', 'center');
-		var startMenuDiv;
 		
 		if (opts.loadUrl.startMenu && !loaded) {
 			$.ajax({
@@ -363,52 +394,57 @@
 				async : false,
 				cache : false,
 				success : function (resp) {
-					initMenu(resp);
+					initMenu(target, resp);
 				},
 				error : function (XMLHttpRequest, textStatus, errorThrown) {
 					$.messager.alert("", textStatus || errorThrown, "error");
 				}
 			});
 		}
+	}
+	
+	/**
+	 * 初始化菜单
+	 * @param menus
+	 */
+	function initMenu(target, menus) {
+		var jqTarget = $(target);
+		var opts = $.data(target, 'app').options;
+		var wall = jqTarget.layout('panel', 'center');
+		var startMenuDiv;
 		
-		/**
-		 * 初始化菜单
-		 * @param menus
-		 */
-		function initMenu(menus) {
-			startMenuDiv = createMenu(target, menus);
+		startMenuDiv = createMenu(target, menus);
+		
+		startMenuDiv.menu({
+			onClick : function (item) {
+				opts.onStartMenuClick.call(target, item);
+			}
+		});
+		
+		var start = $.data(target, 'app')['start'];
+		//确定菜单显示位置
+		var left = 0,
+		top = 0;
+		
+		start.click(function (e) {
+			if (opts.taskBlankPos == 'south') {
+				top = wall.height();
+			} else if (opts.taskBlankPos == 'north') {
+				top = start.height();
+			} else if (opts.taskBlankPos == 'west') {
+				top = start.height() + 7;
+			} else if (opts.taskBlankPos == 'east') {
+				left = wall.width();
+				top = start.height() + 7;
+			}
 			
-			startMenuDiv.menu({
-				onClick : function (item) {
-					opts.onStartMenuClick.call(target, item);
-				}
+			startMenuDiv.menu('show', {
+				left : left,
+				top : top
 			});
-			
-			var start = $.data(target, 'app')['start'];
-			//确定菜单显示位置
-			var left = 0,
-			top = 0;
-			
-			start.click(function (e) {
-				if (opts.taskBlankPos == 'south') {
-					top = wall.height();
-				} else if (opts.taskBlankPos == 'north') {
-					top = start.height();
-				} else if (opts.taskBlankPos == 'west') {
-					top = start.height() + 7;
-				} else if (opts.taskBlankPos == 'east') {
-					left = wall.width();
-					top = start.height() + 7;
-				}
-				
-				startMenuDiv.menu('show', {
-					left : left,
-					top : top
-				});
-			});
-			
-			start.data('menu', startMenuDiv);
-		}
+		});
+		
+		start.data('menu', startMenuDiv);
 	}
 	
 	/**
@@ -646,15 +682,28 @@
 	/**
 	 * 打开默认实现
 	 * @param target
+	 * @param options
 	 */
-	function openApp(target) {
-		var jqTarget = $(target);
-		var opt = $(target).data('app').options;
-		var uuid = $(this).attr('app_id');
-		var appOpt = $(this).data("app");
-		var wall = jqTarget.layout('panel', 'center');
+	function openApp(target, options) {
+		var jqTarget = $(target),
+		opt = $(target).data('app').options,
+		wall = jqTarget.layout('panel', 'center'),
+		uuid,
+		appOpt;
+		if (options) {
+			uuid = UUID();
+			appOpt = options;
+		} else {
+			uuid = $(this).attr('app_id');
+			appOpt = $(this).data("app");
+		}
+		
+		if (opt.iframeOpen) {
+			appOpt['iframe'] = true;
+		}
 		
 		var thisAppWindow = $('div[w_id="' + uuid + '"]', wall);
+		
 		if (thisAppWindow.length) {
 			thisAppWindow.window('open');
 			return;
@@ -687,7 +736,7 @@
 		var defaultRequiredConfig = {
 			title : appOpt.text,
 			inline : true,
-			cache : false,
+			cache : true,
 			onOpen : function () {
 				appendToList($(this).attr('w_id'), $.data(this, 'panel').options.title);
 				if (customOption.onOpen) {
@@ -777,19 +826,19 @@
 		
 		var config = $.extend({}, defaultConfig, appOpt.cnf, customOption, defaultRequiredConfig);
 		
-		if (appOpt.href && !/^http/i.test(appOpt.href)) {
+		if (appOpt.href && !/^http/i.test(appOpt.href) && 　!appOpt.iframe) {
 			config.href = appOpt.href;
 		}
 		appWindow.window(config);
 		
-		if (appOpt.href && /^http/i.test(appOpt.href)) {
+		if (appOpt.href && /^http/i.test(appOpt.href) || appOpt.iframe) {
 			var iframe = $('<iframe/>').attr({
 					width : '100%',
 					height : '99%',
 					frameborder : 0,
 					src : appOpt.href
 				});
-			appWindow.find('.window-body').append(iframe);
+			appWindow.append(iframe);
 		}
 		
 		appWindow.prev('div.window-header').click(function (e) {
@@ -863,6 +912,16 @@
 			
 			item.remove();
 		}
+		return appWindow;
+	}
+	
+	/**
+	 * 创建窗口
+	 * @param target
+	 * @param options
+	 */
+	function createWindow(target, options) {
+		return openApp(target, options);
 	}
 	
 	/**
@@ -932,19 +991,12 @@
 		options.onLoaded.call(target);
 		
 		setTimeout(function () {
-			$('body').attr({//禁用全局事件
+			$('body').attr({ //禁用全局事件
 				oncontextmenu : 'return false',
 				onselectstart : 'return false',
 				ondragstart : 'return false',
 				onbeforecopy : 'return false'
-			}).css({"-moz-user-select":"none","-webkit-user-select":"none"}); 
-			//兼容ie火狐的文本选择禁用
-			if(document.selection){
-				$('body').attr({
-					oncopy : 'document.selection.empty()',
-					onselect : 'document.selection.empty()'
-				});
-			}
+			});
 		}, 500);
 	}
 	
@@ -1021,6 +1073,12 @@
 		},
 		createmenu : function (menuData) {
 			return createMenu(this[0], menuData);
+		},
+		createwindow : function (options) {
+			return createWindow(this[0], options);
+		},
+		refreshapp : function (href) {
+			refresh(this[0], href);
 		}
 	};
 	
@@ -1040,6 +1098,7 @@
 		onOpenApp : function () {}, //app打开事件
 		onClosedApp : function () {}, //app关闭事件
 		onStartMenuClick : function (item) {}, //开始菜单点击事件
+		iframeOpen : false,
 		loadUrl : { //远程数据加载路径
 			app : 'apps.json', //app数据
 			startMenu : 'startMenu.json', //开始菜单数据
