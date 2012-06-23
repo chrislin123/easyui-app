@@ -1,8 +1,11 @@
 [{
 		"id" : "1",
-		"text" : "我的电脑",
-		"href" : "opened.html",
-		"icon" : "themes/windows/icons/computer.png"
+		"text" : "easyui社区",
+		"href" : "http://bbs.btboys.com",
+		"icon" : "themes/windows/icons/computer.png",
+		"cnf":{
+			
+		}
 	}, {
 		"id" : "2",
 		"text" : "回收站",

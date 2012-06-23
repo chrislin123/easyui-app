@@ -413,9 +413,7 @@
 		var wall = jqTarget.layout('panel', 'center');
 		var startMenuDiv;
 		
-		startMenuDiv = createMenu(target, menus);
-		
-		startMenuDiv.menu({
+		startMenuDiv = createMenu(target, menus,{
 			onClick : function (item) {
 				opts.onStartMenuClick.call(target, item);
 			}
@@ -451,7 +449,7 @@
 	 * 创建菜单dom
 	 * @param menus
 	 */
-	function createMenu(target, menus) {
+	function createMenu(target, menus,opt) {
 		var opts = $.data(target, 'app').options;
 		var menuDiv = $('<div style="width:200px;"></div>').appendTo('body');
 		for (var i = 0; i < menus.length; i++) {
@@ -464,7 +462,7 @@
 			if (menu.children) {
 				menuDiv.append(appendChild(menu));
 			} else {
-				var item = $('<div></div>').html(menu.text);
+				var item = $('<div></div>').html(menu.text).data("data",menu);
 				
 				if (menu.href)
 					item.attr("url", menu.href);
@@ -476,7 +474,7 @@
 			}
 		}
 		
-		return menuDiv.menu();
+		return menuDiv.menu(opt);
 		
 		/**
 		 * 递归添加子菜单
@@ -485,7 +483,7 @@
 		function appendChild(menu) {
 			var itemText = menu.text,
 			children = menu.children;
-			var item = $('<div/>').append($('<span></span>').html(itemText));
+			var item = $('<div/>').append($('<span></span>').html(itemText)).data("data",menu);
 			
 			if (menu.href)
 				item.attr("url", menu.href); //未添加点击事件
@@ -505,7 +503,7 @@
 				if (cMenu.children) {
 					item.append(ci.append(appendChild(cMenu)));
 				} else {
-					var cItem = $('<div/>').html(cMenu.text);
+					var cItem = $('<div/>').html(cMenu.text).data("data",cMenu);
 					
 					if (cMenu.href)
 						cItem.attr("url", cMenu.href);
@@ -1071,8 +1069,8 @@
 		openapp : function (appId) {
 			$("#" + appId).dialog("open");
 		},
-		createmenu : function (menuData) {
-			return createMenu(this[0], menuData);
+		createmenu : function (opt) {
+			return createMenu(this[0], opt.data,opt.opt||{});
 		},
 		createwindow : function (options) {
 			return createWindow(this[0], options);

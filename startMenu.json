@@ -1,11 +1,11 @@
 [{
     "id":"startMenu1",
-    "text":"Google",
-    "href":"http://www.google.com.hk",
+    "text":"新浪微博",
+    "href":"http://weibo.com",
     "children":[{
 	    "id":"startMenu11",
-	    "text":"Baidu",
-	    "href":"http://www.baidu.com",
+	    "text":"夏悸的微博",
+	    "href":"http://weibo.com/521090828",
 	"iconCls":"icon-ok"
     }],
 	"iconCls":"icon-ok"

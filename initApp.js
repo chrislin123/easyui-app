@@ -8,8 +8,14 @@ $(function () {
     $('body').app({
         onTaskBlankContextMenu:onTaskBlankContextMenu,
         onAppContextMenu:onAppContextMenu,
-        onWallContextMenu:onWallContextMenu
+        onWallContextMenu:onWallContextMenu,
+		onStartMenuClick:onStartMenuClick
     });
+	
+	function onStartMenuClick(item){
+		var data = $(item.target).data("data");
+		$('body').app("createwindow",data);
+	}
 
     var appListMenuData = [
         {
@@ -32,13 +38,7 @@ $(function () {
         }
     ];
 
-    var appListMenu = $('body').app('createMenu', appListMenuData);
-
-    appListMenu.menu({
-        onClick:function (item) {
-           
-        }
-    });
+    var appListMenu = $('body').app('createMenu', {data:appListMenuData});
 
     function onTaskBlankContextMenu(e, appid) {
         if (appid) {
@@ -69,36 +69,41 @@ $(function () {
     var wallMenuData = [
         {
             "text":"属性",
-            "href":"http://www.sina.com"
+            "href":"http://www.btboys.com"
         },
         '-',
         {
             "text":"关于",
-            "href":"http://www.btboys.com"
+            "href":"http://weibo.com/521090828"
         }
     ];
     var appMenuData = [
         {
-            "text":"打开",
-            "href":"http://www.sina.com"
+            "text":"打开"
         },
         '-',
         {
-            "text":"属性",
-            "href":"http://www.btboys.com"
+            "text":"属性"
         }
     ];
 
-    var wallMenu = $('body').app('createMenu', wallMenuData);
-    var appMenu = $('body').app('createMenu', appMenuData);
+    var wallMenu = $('body').app('createMenu', {data:wallMenuData,opt:{onClick:onStartMenuClick}});
+    var appMenu = $('body').app('createMenu', {data:appMenuData,opt:{onClick:onAppContextMenuClick}});
 
-
+	var APPID;
     function onAppContextMenu(e,appid) {
         appMenu.menu('show', {
             left:e.pageX,
             top:e.pageY
         });
+		APPID = appid;
     }
+	
+	function onAppContextMenuClick(item){
+		if(item.text == '打开'){
+			$("li[app_id='"+APPID+"']").dblclick();
+		}
+	}
 
     function onWallContextMenu(e) {
         wallMenu.menu('show', {
