@@ -1,7 +1,7 @@
 /**
  * Created by ____′↘夏悸，Universe，風亦飛
  * User: ____′↘夏悸
- * Date: 12-3-26
+ * Date: 12-7-24
  * 这个是一个jQuery Easyui的的桌面扩展
  * 讨论学习群：
  *    142872541（一）
@@ -9,7 +9,7 @@
  *    70168958（500人超级群）
  *    腾讯微博群号：83952631
  *    社区： http://bbs.btboys.com
- * version: 0.2
+ * version: 0.3
  */
 (function ($) {
 	var loaded = false;
@@ -829,6 +829,10 @@
 		}
 		appWindow.window(config);
 		
+		if(appOpt.id){
+			appWindow.attr("id","app_window_"+appOpt.id);
+		}
+		
 		if (appOpt.href && /^http/i.test(appOpt.href) || appOpt.iframe) {
 			var iframe = $('<iframe/>').attr({
 					width : '100%',
@@ -1064,10 +1068,10 @@
 			});
 		},
 		closeapp : function (appId) {
-			$("#" + appId).dialog("close");
+			$("#app_window_" + appId).dialog("close");
 		},
 		openapp : function (appId) {
-			$("#" + appId).dialog("open");
+			$("#app_window_" + appId).dialog("open");
 		},
 		createmenu : function (opt) {
 			return createMenu(this[0], opt.data,opt.opt||{});
