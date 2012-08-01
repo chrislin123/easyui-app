@@ -14,7 +14,7 @@
 (function ($) {
 	var loaded = false;
 	var prevOpenedApp,
-	currentOpenedApp;
+	currentOpenedApp,allWindow = {};
 	/**
 	 * layout初始化
 	 * @param target
@@ -689,7 +689,12 @@
 		uuid,
 		appOpt;
 		if (options) {
-			uuid = UUID();
+			if(!options['uuid']){
+				uuid = UUID();
+				options['uuid'] = uuid;
+			}else{
+				uuid = options['uuid'];
+			}
 			appOpt = options;
 		} else {
 			uuid = $(this).attr('app_id');
@@ -708,6 +713,8 @@
 		}
 		
 		var appWindow = $('<div/>').attr('w_id', uuid).appendTo(wall);
+		
+		allWindow[uuid] = appWindow;
 		
 		var customOption = opt.onBeforeOpenApp.call(target, appOpt) || {};
 		
@@ -759,11 +766,6 @@
 					if ($.browser.msie) {
 						CollectGarbage();
 					}
-				} else { //释放combo
-					$(this).find(".combo-f").each(function () {
-						var panel = $(this).data().combo.panel;
-						panel.panel("destroy");
-					});
 				}
 				
 				removeListItem($(this).attr('w_id'));
@@ -775,6 +777,8 @@
 						opt.onClosedApp.call(this);
 					
 				}
+				
+				delete allWindow[$(this).attr('w_id')];
 				
 				$(this).window("destroy");
 				$('li[l_id="' + prevOpenedApp + '"]').addClass('selected');
@@ -1068,10 +1072,10 @@
 			});
 		},
 		closeapp : function (appId) {
-			$("#app_window_" + appId).dialog("close");
+			$("#app_window_" + appId).window("close");
 		},
 		openapp : function (appId) {
-			$("#app_window_" + appId).dialog("open");
+			$("#app_window_" + appId).window("open");
 		},
 		createmenu : function (opt) {
 			return createMenu(this[0], opt.data,opt.opt||{});
@@ -1081,6 +1085,12 @@
 		},
 		refreshapp : function (href) {
 			refresh(this[0], href);
+		},
+		closeall:function(){
+			$.each(allWindow,function(){
+				this.window("close");
+			});
+			allWindow = {};
 		}
 	};
 	
