@@ -1,7 +1,7 @@
 /**
  * Created by ____′↘夏悸，Universe，風亦飛
  * User: ____′↘夏悸
- * Date: 12-7-24
+ * Date: 2012-8-8
  * 这个是一个jQuery Easyui的的桌面扩展
  * 讨论学习群：
  *    142872541（一）
@@ -219,7 +219,7 @@
 		left = 10;
 		
 		var relSize = opts.iconSize + 45;
-		for (var i in apps) {
+		for (var i = 0;i<apps.length;i++) {
 			if (line > lines) {
 				line = 1;
 				top = 20;
@@ -981,7 +981,7 @@
 		$.ajaxSetup({
 			async : false
 		});
-		for (var i in initMethods) {
+		for (var i = 0;i<initMethods.length;i++) {
 			var step = initMethods[i];
 			progressBar.progressbar({
 				text : options.lang[step.name]
